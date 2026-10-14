@@ -3,15 +3,13 @@
 
 Sources:
   - NWS Honolulu Surf Zone Forecast (SRFHFO): discussion + the two Big Island zones only
-  - NOAA NDBC buoy 51206 (Hilo): latest swell / wind-wave reading and water temperature
 
-A source that fails keeps its previous block from data.json, so the page never goes blank.
+If the fetch fails, data.json is left as it was, so the page never goes blank.
 Standard library only.
 
 Usage:
   python3 scripts/update.py                     # fetch everything, write data.json
   python3 scripts/update.py --srf-file FILE     # parse a saved SRF product instead of fetching it
-  python3 scripts/update.py --offline           # skip the network for the buoy
 """
 import datetime as dt
 import json
@@ -221,50 +219,10 @@ def parse_srf(text):
     }
 
 
-# ---------------------------------------------------------------- NDBC buoy 51206
-
-def ndbc_rows(text):
-    lines = text.splitlines()
-    header = next(l for l in lines if l.startswith("#YY"))[1:].split()
-    rows = [dict(zip(header, l.split())) for l in lines if l.strip() and not l.startswith("#")]
-    return rows
-
-
-def num(v):
-    try:
-        return None if v in (None, "MM", "N/A") else float(v)
-    except ValueError:
-        return None
-
-
-def fetch_buoy():
-    spec = ndbc_rows(get("https://www.ndbc.noaa.gov/data/realtime2/51206.spec"))
-    r = spec[0]
-    t = dt.datetime(int(r["YY"]), int(r["MM"]), int(r["DD"]), int(r["hh"]), int(r["mm"]),
-                    tzinfo=dt.timezone.utc).astimezone(HST)
-    buoy = {
-        "station": "51206", "name": "Hilo, HI", "t": t.isoformat(),
-        "wvhtM": num(r.get("WVHT")), "swhM": num(r.get("SwH")), "swpS": num(r.get("SwP")),
-        "swd": r.get("SwD") if r.get("SwD") not in ("MM", None) else None,
-        "wwhM": num(r.get("WWH")), "wwpS": num(r.get("WWP")),
-        "wwd": r.get("WWD") if r.get("WWD") not in ("MM", None) else None,
-        "mwdDeg": num(r.get("MWD")),
-    }
-    try:
-        met = ndbc_rows(get("https://www.ndbc.noaa.gov/data/realtime2/51206.txt"))
-        w = next((num(x.get("WTMP")) for x in met if num(x.get("WTMP")) is not None), None)
-        if w is not None:
-            buoy["wtmpC"] = w
-    except Exception as e:  # noqa: BLE001
-        log("buoy water temp failed: %s" % e)
-    return {k: v for k, v in buoy.items() if v is not None}
-
-
 # ---------------------------------------------------------------- main
 
 def main(argv):
     srf_file = argv[argv.index("--srf-file") + 1] if "--srf-file" in argv else None
-    offline = "--offline" in argv
     try:
         with open(OUT, encoding="utf-8") as f:
             prev = json.load(f)
@@ -273,6 +231,7 @@ def main(argv):
 
     data = dict(prev)
     data.pop("bin", None)
+    data.pop("buoy", None)
     ok = []
     try:
         text = open(srf_file, encoding="utf-8").read() if srf_file else fetch_srf_text()
@@ -280,13 +239,6 @@ def main(argv):
         ok.append("noaa")
     except Exception as e:  # noqa: BLE001
         log("NWS forecast failed: %s" % e)
-    if not offline:
-        for key, fn in (("buoy", fetch_buoy),):
-            try:
-                data[key] = fn()
-                ok.append(key)
-            except Exception as e:  # noqa: BLE001
-                log("%s failed: %s" % (key, e))
 
     if not ok:
         log("every source failed; data.json left unchanged")
@@ -296,8 +248,7 @@ def main(argv):
         json.dump(data, f, ensure_ascii=False, indent=1)
         f.write("\n")
     noaa = data.get("noaa", {})
-    log("wrote %s: sources ok=%s, NWS issued %s, buoy %s" % (
-        OUT, ",".join(ok), noaa.get("issued"), data.get("buoy", {}).get("t")))
+    log("wrote %s: NWS issued %s" % (OUT, noaa.get("issued")))
     return 0
 
 

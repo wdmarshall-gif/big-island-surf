@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Big Island Surf</title>
-<meta name="description" content="Big Island-only surf forecast: NWS Honolulu shore heights, swell directions, tides and the Hilo buoy, updated automatically.">
+<meta name="description" content="Big Island-only surf forecast: NWS Honolulu shore heights, swell directions and tides, updated automatically.">
 <meta property="og:title" content="Big Island Surf">
-<meta property="og:description" content="Hawaiʻi Island surf heights by shore, swell outlook, tides and Hilo buoy. Updated every few hours from NOAA.">
+<meta property="og:description" content="Hawaiʻi Island surf heights by shore, swell outlook and tides. Updated every few hours from NOAA.">
 <meta name="theme-color" content="#E8EFF1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161E" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{
-  /* Layout: one chart-sheet column. Forecast lede on top, island surf map beside the shore list, then Kona/Hilo sheets, buoy, notes. */
+  /* Layout: one chart-sheet column. Forecast lede on top, island surf map beside the shore list, then Kona/Hilo sheets. */
   --sea:#E8EFF1; --sheet:#F6F9FA; --ink:#0D2531; --ink-2:#4B6571; --ink-3:#7D949E;
   --rule:#C8D7DC; --contour:#B4C9D1; --land:#2C3133; --land-ink:#DCE5E8;
   --accent:#0A6A8A; --accent-soft:#CFE5ED;
@@ -154,17 +154,6 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .tide svg{display:block; width:100%; height:auto; max-width:100%}
 .tide .more{margin:6px 0 0; font-family:var(--f-mono); font-size:11.5px; color:var(--ink-2)}
 
-/* Buoy */
-.buoy{display:grid; grid-template-columns:auto minmax(0,1fr); gap:18px; align-items:center}
-@media (max-width:460px){ .buoy{grid-template-columns:minmax(0,1fr)} .buoy .dial{justify-self:center} }
-.buoy .dial svg{display:block; width:128px; height:128px}
-.stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:14px 18px}
-.stat dt{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
-.stat dd{margin:2px 0 0}
-.stat .n{font-family:var(--f-display); font-weight:700; font-size:1.9rem; line-height:1; font-variant-numeric:tabular-nums}
-.stat .n small{font-size:.5em; color:var(--ink-2); margin-left:2px}
-.stat .s{display:block; font-size:13px; color:var(--ink-2)}
-.key{display:inline-block; width:10px; height:3px; border-radius:2px; vertical-align:middle; margin-right:6px}
 
 /* Notes */
 
@@ -223,17 +212,12 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
     <div class="zones" id="zones"></div>
   </section>
 
-  <section aria-labelledby="buoy-h">
-    <div class="sec-h"><h2 id="buoy-h">Hilo buoy reading</h2><span class="eyebrow" id="buoy-t"></span></div>
-    <div class="card"><div class="buoy" id="buoy"><span class="skel">Latest measured swell from NOAA buoy 51206 off Hilo.</span></div></div>
-  </section>
 
   <footer>
     <p>Surf heights are wave faces, trough to crest, in feet. They vary beach to beach, and sets bigger than the range show up every so often. Expect rip currents near any surf. Beach hazards: <a href="https://hawaiibeachsafety.com" target="_blank" rel="noopener">hawaiibeachsafety.com</a>.</p>
     <p id="sched">Refreshes automatically about every 3 hours. NWS Honolulu issues a new surf forecast each morning and afternoon.</p>
     <div class="links">
       <a href="https://www.weather.gov/hfo/SRF" target="_blank" rel="noopener">NWS surf forecast</a>
-      <a href="https://www.ndbc.noaa.gov/station_page.php?station=51206" target="_blank" rel="noopener">Buoy 51206</a>
       <a href="https://github.com/wdmarshall-gif/big-island-surf" target="_blank" rel="noopener">Source on GitHub</a>
     </div>
   </footer>
@@ -412,7 +396,6 @@ const SEGS = {
   southLee:{edges: [14],          anchor: [(P[14][0] + P[15][0]) / 2, (P[14][1] + P[15][1]) / 2]},
   west:    {edges: range(15, 23), anchor: P[18]}
 };
-const BUOY = proj([19.781, -154.970]);
 const TOWNS = [{name:'Kona', p:P[18], dx:9, anchor:'start'}, {name:'Hilo', p:P[6], dx:-9, anchor:'end'}];
 
 function arrowAt(x1, y1, x2, y2, w, cls){
@@ -425,7 +408,7 @@ function arrowAt(x1, y1, x2, y2, w, cls){
 }
 const unit = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];
 
-function drawMap(rows, slotIdx, swells, buoy){
+function drawMap(rows, slotIdx, swells){
   let s = '<style>' +
     '.ct{fill:none;stroke:var(--contour)}' +
     '.rg{fill:none;stroke:var(--rule)}' +
@@ -442,8 +425,6 @@ function drawMap(rows, slotIdx, swells, buoy){
     '.sb{stroke:var(--accent)} .sb-h{fill:var(--accent)}' +
     '.sd{stroke:var(--ink-3)} .sd-h{fill:var(--ink-3)}' +
     '.al{fill:var(--ink);font:600 11px var(--f-mono)}' +
-    '.bu{fill:var(--sheet);stroke:var(--accent);stroke-width:2}' +
-    '.bl{fill:var(--accent);font:500 10px var(--f-mono);letter-spacing:.04em}' +
     '</style>';
   // compass ring + depth contours
   s += '<circle class="rg" cx="' + CX + '" cy="' + CY + '" r="' + RING + '" stroke-width="1"/>';
@@ -480,11 +461,6 @@ function drawMap(rows, slotIdx, swells, buoy){
     const lr = RING - 13, px = -u[1] * 14, py = u[0] * 14;
     s += '<text class="al" x="' + f1(CX + u[0] * lr + px) + '" y="' + f1(CY + u[1] * lr + py + 4) + '" text-anchor="middle">' + esc(sw.dir) + '</text>';
   });
-  // buoy
-  if (buoy) {
-    s += '<circle class="bu" cx="' + f1(BUOY[0]) + '" cy="' + f1(BUOY[1]) + '" r="4.5"/>';
-    s += '<text class="bl" x="' + f1(BUOY[0] + 8) + '" y="' + f1(BUOY[1] - 7) + '">BUOY</text>';
-  }
   // shore labels
   Object.keys(SEGS).forEach(k => {
     const r = segHas[k]; if (!r) return;
@@ -555,20 +531,6 @@ function tideChart(st, now){
   });
   return s + '</svg>';
 }
-function buoyDial(b){
-  const c = 64, r = 52;
-  let s = '<svg viewBox="0 0 128 128" role="img" aria-label="Measured swell and wind-wave directions">';
-  s += '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="var(--sea)" stroke="var(--rule)"/>';
-  ['N', 'E', 'S', 'W'].forEach((l, i) => {
-    const u = unit(i * 90);
-    s += '<text x="' + f1(c + u[0] * (r - 10)) + '" y="' + f1(c + u[1] * (r - 10) + 4) + '" text-anchor="middle" fill="var(--ink-3)" style="font:500 10px var(--f-mono)">' + l + '</text>';
-  });
-  const add = (deg, w, cls) => { if (deg == null) return; const u = unit(deg); s += arrowAt(c + u[0] * (r - 2), c + u[1] * (r - 2), c + u[0] * 8, c + u[1] * 8, w, cls); };
-  s += '<style>.dw{stroke:var(--ink-3)}.dw-h{fill:var(--ink-3)}.ds{stroke:var(--accent)}.ds-h{fill:var(--accent)}</style>';
-  add(b.wwd in DIRS ? DIRS[b.wwd] : null, 2, 'dw');
-  add(b.swd in DIRS ? DIRS[b.swd] : (isFinite(b.mwdDeg) ? +b.mwdDeg : null), 3.4, 'ds');
-  return s + '</svg>';
-}
 
 /* ---------- render ---------- */
 const state = {data:null, slots:[], slot:0, userPicked:false, rows:[], swells:[]};
@@ -613,7 +575,7 @@ function renderSlotDependent(){
   $('dots').innerHTML = state.slots.map((s, k) => '<i' + (k === i ? ' class="on"' : '') + '></i>').join('');
   $('prev').disabled = i <= 0;
   $('next').disabled = i >= state.slots.length - 1;
-  drawMap(state.rows, i, state.swells, state.data && state.data.buoy);
+  drawMap(state.rows, i, state.swells);
 }
 
 function render(){
@@ -637,7 +599,6 @@ function render(){
   renderTable();
   renderSlotDependent();
   renderZones(noaa);
-  renderBuoy(d.buoy);
 }
 
 function renderZones(noaa){
@@ -659,21 +620,6 @@ function renderZones(noaa){
       (sunDay ? '<div class="sun"><span>Sunrise ' + esc(sunDay.sunrise || '—') + '</span><span>Sunset ' + esc(sunDay.sunset || '—') + '</span><span>' + esc(sunDay.label || '') + '</span></div>' : '') +
       '</article>';
   }).join('');
-}
-
-function renderBuoy(b){
-  if (!b) { $('buoy').innerHTML = '<span class="skel">No buoy reading stored yet.</span>'; $('buoy-t').textContent = ''; return; }
-  const t = validDate(b.t);
-  const old = t && (Date.now() - t.getTime()) > 6 * 36e5;
-  $('buoy-t').textContent = 'NOAA ' + (b.station || '51206') + (t ? ' · ' + fmt(t, {weekday:'short'}) + ' ' + hm(t) : '') + (old ? ' · older reading' : '');
-  const per = +b.swpS, kind = !isFinite(per) ? '' : per >= 13 ? 'long-period groundswell' : per >= 9 ? 'mid-period swell' : 'short-period windswell';
-  const stat = (lab, val, unitTxt, sub, key) => '<div class="stat"><dt>' + (key ? '<span class="key" style="background:' + key + '"></span>' : '') + lab + '</dt><dd><span class="n">' + val + '<small>' + unitTxt + '</small></span><span class="s">' + sub + '</span></dd></div>';
-  let h = '<div class="dial">' + buoyDial(b) + '</div><dl class="stats">';
-  if (isFinite(b.swhM)) h += stat('Swell', ft(b.swhM).toFixed(1), 'ft', (isFinite(per) ? per.toFixed(0) + ' s · ' : '') + 'from ' + esc(b.swd || '—') + (kind ? '<br>' + kind : ''), 'var(--accent)');
-  if (isFinite(b.wwhM)) h += stat('Wind waves', ft(b.wwhM).toFixed(1), 'ft', (isFinite(b.wwpS) ? (+b.wwpS).toFixed(0) + ' s · ' : '') + 'from ' + esc(b.wwd || '—'), 'var(--ink-3)');
-  if (isFinite(b.wvhtM)) h += stat('Combined seas', ft(b.wvhtM).toFixed(1), 'ft', 'significant height' + (isFinite(b.mwdDeg) ? ' · ' + Math.round(b.mwdDeg) + '°' : ''));
-  if (isFinite(b.wtmpC)) h += stat('Water', (b.wtmpC * 9 / 5 + 32).toFixed(0), '°F', (+b.wtmpC).toFixed(1) + ' °C');
-  $('buoy').innerHTML = h + '</dl>';
 }
 
 function nextRefresh(){
@@ -723,7 +669,7 @@ $('next').addEventListener('click', () => stepSlot(1));
 
 /* first frame: island, legend, empty shores */
 drawLegend();
-drawMap([], 0, [], null);
+drawMap([], 0, []);
 setInterval(updateFresh, 60000);
 
 async function load(){

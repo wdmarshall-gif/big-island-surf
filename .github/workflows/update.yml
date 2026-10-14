@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch NWS forecast and Hilo buoy
+      - name: Fetch the NWS surf forecast
         run: python3 scripts/update.py
 
       - name: Publish data.json (GitHub Pages redeploys on push)
