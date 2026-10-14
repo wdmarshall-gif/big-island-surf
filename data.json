@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-14T18:00:17Z",
+ "updatedAt": "2026-10-14T18:58:37Z",
  "noaa": {
   "header": "FZHW52 PHFO 141352",
   "issued": "352 AM HST Wed Oct 14 2026",
@@ -272,16 +272,16 @@
  "buoy": {
   "station": "51206",
   "name": "Hilo, HI",
-  "t": "2026-10-14T07:26:00-10:00",
-  "wvhtM": 2.1,
-  "swhM": 1.6,
-  "swpS": 14.3,
+  "t": "2026-10-14T08:26:00-10:00",
+  "wvhtM": 1.8,
+  "swhM": 1.2,
+  "swpS": 12.5,
   "swd": "NNW",
-  "wwhM": 1.4,
-  "wwpS": 9.9,
-  "wwd": "NE",
-  "mwdDeg": 335.0,
-  "wtmpC": 27.4
+  "wwhM": 1.3,
+  "wwpS": 8.3,
+  "wwd": "ENE",
+  "mwdDeg": 342.0,
+  "wtmpC": 27.5
  },
  "bin": {
   "title": "Hawaii County Surf Forecast for October 14, 2026",
