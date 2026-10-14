@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Big Island Surf</title>
+<meta name="description" content="Big Island-only surf forecast: NWS Honolulu shore heights, swell directions, tides and the Hilo buoy, updated automatically.">
+<meta property="og:title" content="Big Island Surf">
+<meta property="og:description" content="Hawaiʻi Island surf heights by shore, swell outlook, tides and Hilo buoy. Updated every few hours from NOAA.">
+<meta name="theme-color" content="#E8EFF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161E" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230D2531'/%3E%3Cpath d='M8 40c8 0 10-12 20-12s10 12 20 12 8-6 8-6' fill='none' stroke='%232C9FC4' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M8 50c8 0 10-6 20-6s10 6 20 6' fill='none' stroke='%23E0AE33' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  /* Layout: one chart-sheet column. Forecast lede on top, island surf map beside the shore list, then Kona/Hilo sheets, buoy, notes. */
+  --sea:#E8EFF1; --sheet:#F6F9FA; --ink:#0D2531; --ink-2:#4B6571; --ink-3:#7D949E;
+  --rule:#C8D7DC; --contour:#B4C9D1; --land:#2C3133; --land-ink:#DCE5E8;
+  --accent:#0A6A8A; --accent-soft:#CFE5ED;
+  --h1:#93B6C0; --h2:#2C9FC4; --h3:#E0AE33; --h4:#E9772F; --h5:#D23838;
+  --ok:#2C7D52; --warn:#A86A12;
+  --f-display:"Big Shoulders Display","Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sea:#06161E; --sheet:#0B202A; --ink:#E2EEF1; --ink-2:#93ACB6; --ink-3:#5F7B87;
+    --rule:#1A3845; --contour:#14394A; --land:#323A3D; --land-ink:#CAD6DA;
+    --accent:#5EC4E2; --accent-soft:#0F3646; --h1:#6C97A4; --ok:#52C08A; --warn:#E3A848;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --sea:#06161E; --sheet:#0B202A; --ink:#E2EEF1; --ink-2:#93ACB6; --ink-3:#5F7B87;
+  --rule:#1A3845; --contour:#14394A; --land:#323A3D; --land-ink:#CAD6DA;
+  --accent:#5EC4E2; --accent-soft:#0F3646; --h1:#6C97A4; --ok:#52C08A; --warn:#E3A848;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+[hidden]{display:none!important}
+img{max-width:100%}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{
+  background:var(--sea); color:var(--ink);
+  font-family:var(--f-body); font-size:15px; line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:20px 48px;
+  -webkit-font-smoothing:antialiased;
+  margin:0;
+}
+.wrap{max-width:1000px; margin:0 auto; display:grid; gap:32px}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font-family:var(--f-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2)}
+h1,h2,h3{margin:0; text-wrap:balance}
+a{color:var(--accent); text-underline-offset:2px}
+a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+
+/* Header */
+.top{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px 24px; border-bottom:2px solid var(--ink); padding-bottom:12px}
+.top h1{font-family:var(--f-display); font-weight:800; font-size:clamp(2.2rem, 9vw, 3.6rem); line-height:.88; letter-spacing:.01em; text-transform:uppercase}
+.meta{display:flex; flex-direction:column; align-items:flex-end; gap:6px; font-family:var(--f-mono); font-size:12px; color:var(--ink-2); text-align:right}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px; border:1px solid var(--rule); background:var(--sheet); color:var(--ink-2); font-family:var(--f-mono); font-size:11.5px}
+.pill::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--ink-3)}
+.pill.ok::before{background:var(--ok)} .pill.warn::before{background:var(--warn)}
+@media (max-width:520px){ .meta{align-items:flex-start; text-align:left} }
+
+/* State banner */
+.state{display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border:1px dashed var(--rule); border-radius:var(--r); background:var(--sheet); color:var(--ink-2)}
+.state b{color:var(--ink)}
+
+/* Outlook */
+.lede{display:grid; gap:14px}
+.discussion{margin:0; font-size:1.06rem; line-height:1.6; max-width:64ch}
+.product{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); letter-spacing:.04em}
+.swells{display:flex; flex-wrap:wrap; gap:8px}
+.swell{display:inline-flex; align-items:center; gap:8px; padding:6px 12px 6px 8px; border:1px solid var(--rule); border-radius:999px; background:var(--sheet); font-size:13px; line-height:1.25}
+.swell svg{flex:none}
+.swell b{font-family:var(--f-mono); font-weight:500; font-size:13px}
+.swell .tr{color:var(--ink-2)}
+.swell.dim{opacity:.62}
+
+/* Surf section */
+.sec-h{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 16px; margin-bottom:12px}
+.sec-h h2{font-family:var(--f-display); font-weight:700; font-size:1.9rem; line-height:1; text-transform:uppercase; letter-spacing:.02em}
+.surf{display:grid; gap:12px}
+.map{margin:0 auto; width:100%; max-width:600px; background:var(--sheet); border:1px solid var(--rule); border-radius:var(--r); padding:10px 8px 12px; min-width:0}
+.map svg{display:block; width:100%; height:auto; max-width:100%}
+.showing{display:flex; justify-content:center; align-items:baseline; gap:8px; font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2)}
+.showing b{font-family:var(--f-body); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink); font-weight:600}
+.legend{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; font-family:var(--f-mono); font-size:11px; color:var(--ink-2)}
+.legend i{display:inline-block; width:14px; height:4px; border-radius:2px; vertical-align:middle; margin-right:5px}
+
+/* Forecast table */
+.table-wrap{overflow-x:auto; width:100%; max-width:600px; margin:0 auto}
+.fc{width:100%; border-collapse:separate; border-spacing:4px; font-variant-numeric:tabular-nums}
+.fc th, .fc td{padding:0}
+.fc thead th{font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); font-weight:500; text-align:center}
+.fc thead .grp{color:var(--ink); border-bottom:2px solid var(--ink); padding:2px 0 5px}
+.fc thead .sh{text-align:left; vertical-align:bottom; padding-bottom:6px}
+.tc{width:100%; min-width:50px; padding:6px 2px; border:1px solid var(--rule); border-radius:8px; background:var(--sheet); color:var(--ink-2); font:500 12px var(--f-mono); letter-spacing:.06em; cursor:pointer}
+.tc[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--sea)}
+.fc tbody th{text-align:left; padding:6px 6px 6px 0; min-width:96px}
+.fc tbody th b{display:block; font-weight:700; font-size:15px; line-height:1.2}
+.fc tbody th span{display:block; font-weight:400; font-size:12px; color:var(--ink-2); line-height:1.3}
+.fc td{text-align:center; border-radius:8px; padding:11px 2px; background:var(--sheet); background:color-mix(in srgb, var(--c) 24%, var(--sheet)); font-family:var(--f-display); font-weight:700; font-size:1.5rem; line-height:1; color:var(--ink); white-space:nowrap}
+.fc td.on{background:color-mix(in srgb, var(--c) 60%, var(--sheet)); box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--c) 75%, var(--ink))}
+.hint{margin:0; text-align:center; font-size:12.5px; color:var(--ink-2)}
+
+/* Zones */
+.zones{display:grid; gap:16px}
+@media (min-width:780px){ .zones{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+.card{background:var(--sheet); border:1px solid var(--rule); border-radius:var(--r); padding:18px; min-width:0; display:grid; gap:16px; align-content:start}
+.card-h h3{font-family:var(--f-display); font-weight:800; font-size:1.9rem; line-height:1; text-transform:uppercase; letter-spacing:.02em}
+.card-h p{margin:4px 0 0; font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3)}
+.periods{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px}
+.period{display:grid; gap:6px; align-content:start; min-width:0}
+.period .pl{font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+.period .wx{font-weight:500; line-height:1.4}
+.period dl{margin:0; display:grid; gap:4px; font-size:13.5px}
+.period dl div{display:grid; gap:0}
+.period dt{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.period dd{margin:0; color:var(--ink)}
+.sun{display:flex; flex-wrap:wrap; gap:4px 16px; font-family:var(--f-mono); font-size:12px; color:var(--ink-2); border-top:1px solid var(--rule); padding-top:12px}
+.tide h4{margin:0 0 4px; font-family:var(--f-mono); font-weight:500; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2)}
+.tide svg{display:block; width:100%; height:auto; max-width:100%}
+.tide .more{margin:6px 0 0; font-family:var(--f-mono); font-size:11.5px; color:var(--ink-2)}
+
+/* Buoy */
+.buoy{display:grid; grid-template-columns:auto minmax(0,1fr); gap:18px; align-items:center}
+@media (max-width:460px){ .buoy{grid-template-columns:minmax(0,1fr)} .buoy .dial{justify-self:center} }
+.buoy .dial svg{display:block; width:128px; height:128px}
+.stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:14px 18px}
+.stat dt{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.stat dd{margin:2px 0 0}
+.stat .n{font-family:var(--f-display); font-weight:700; font-size:1.9rem; line-height:1; font-variant-numeric:tabular-nums}
+.stat .n small{font-size:.5em; color:var(--ink-2); margin-left:2px}
+.stat .s{display:block; font-size:13px; color:var(--ink-2)}
+.key{display:inline-block; width:10px; height:3px; border-radius:2px; vertical-align:middle; margin-right:6px}
+
+/* Notes */
+.notes p{margin:0 0 10px; max-width:66ch; color:var(--ink-2)}
+.notes p:last-child{margin-bottom:0}
+.notes .src{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); margin-bottom:10px}
+
+footer{display:grid; gap:8px; font-size:12.5px; color:var(--ink-2); border-top:1px solid var(--rule); padding-top:16px}
+footer p{margin:0; max-width:80ch}
+footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mono); font-size:11.5px}
+
+.coast{transition:stroke .4s ease, stroke-width .4s ease}
+@media (prefers-reduced-motion: reduce){ .coast{transition:none} }
+.skel{color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Hawaiʻi Island · NWS Honolulu surf zone forecast</div>
+      <h1>Big Island Surf</h1>
+    </div>
+    <div class="meta">
+      <span id="issued">Waiting for forecast</span>
+      <span class="pill" id="fresh">Loading</span>
+    </div>
+  </header>
+
+  <div class="state" id="state">
+    <div><b id="state-t">Loading the latest forecast…</b><br><span id="state-d">Fetching the latest NWS forecast for Hawaiʻi Island.</span></div>
+  </div>
+
+  <section class="surf" aria-label="Surf map and forecast heights">
+    <figure class="map">
+      <div class="showing" id="showing">Surf heights by shore</div>
+      <svg id="map" viewBox="0 0 420 470" role="img" aria-label="Map of Hawaiʻi Island with coastlines colored by forecast surf height and arrows for incoming swells"></svg>
+      <figcaption class="legend" id="legend"></figcaption>
+    </figure>
+    <div class="table-wrap"><table class="fc" id="fc" aria-label="Forecast surf heights in feet by shore and time"></table></div>
+    <p class="hint">Wave-face heights in feet. Tap a time to show it on the map.</p>
+  </section>
+
+  <section class="lede" aria-labelledby="out-h">
+    <div class="sec-h"><h2 id="out-h">Swell outlook</h2></div>
+    <p class="discussion" id="discussion"><span class="skel">The NWS forecaster's discussion of incoming swells and trade winds appears here.</span></p>
+    <div class="swells" id="swells" aria-label="Swells in the forecast"></div>
+    <div class="product" id="product"></div>
+  </section>
+
+  <section aria-labelledby="cond-h">
+    <div class="sec-h"><h2 id="cond-h">Weather, wind &amp; tides</h2></div>
+    <div class="zones" id="zones"></div>
+  </section>
+
+  <section aria-labelledby="buoy-h">
+    <div class="sec-h"><h2 id="buoy-h">Hilo buoy reading</h2><span class="eyebrow" id="buoy-t"></span></div>
+    <div class="card"><div class="buoy" id="buoy"><span class="skel">Latest measured swell from NOAA buoy 51206 off Hilo.</span></div></div>
+  </section>
+
+  <section class="notes" aria-labelledby="bin-h">
+    <div class="sec-h"><h2 id="bin-h">Swell notes</h2></div>
+    <div id="bin"><p class="skel">The Big Island Now swell summary appears here.</p></div>
+  </section>
+
+  <footer>
+    <p>Surf heights are wave faces, trough to crest, in feet. They vary beach to beach, and sets bigger than the range show up every so often. Expect rip currents near any surf. Beach hazards: <a href="https://hawaiibeachsafety.com" target="_blank" rel="noopener">hawaiibeachsafety.com</a>.</p>
+    <p id="sched">Refreshes automatically about every 3 hours. NWS Honolulu issues a new surf forecast each morning and afternoon.</p>
+    <div class="links">
+      <a href="https://www.weather.gov/hfo/SRF" target="_blank" rel="noopener">NWS surf forecast</a>
+      <a href="https://www.ndbc.noaa.gov/station_page.php?station=51206" target="_blank" rel="noopener">Buoy 51206</a>
+      <a href="https://bigislandnow.com/surf/" target="_blank" rel="noopener">Big Island Now surf</a>
+      <a href="https://github.com/wdmarshall-gif/big-island-surf" target="_blank" rel="noopener">Source on GitHub</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- constants ---------- */
+const TZ = 'Pacific/Honolulu';
+const REFRESH_UTC_HOURS = [2,5,8,11,14,17,20,23], REFRESH_MIN = 47;
+const DIRS = {N:0,NNE:22.5,NE:45,ENE:67.5,E:90,ESE:112.5,SE:135,SSE:157.5,S:180,SSW:202.5,SW:225,WSW:247.5,W:270,WNW:292.5,NW:315,NNW:337.5};
+const LEVEL_WORD = ['', 'small', 'fun size', 'solid', 'big', 'huge'];
+const SHORES = {
+  'leeward:west':   {seg:'west',     title:'West shores',  sub:'Kona · Kohala',       ord:0},
+  'leeward:south':  {seg:'southLee', title:'South shores', sub:'South Kona · Ka Lae', ord:1},
+  'windward:south': {seg:'southSE',  title:'South shores', sub:'Kaʻū · Puna',         ord:2},
+  'windward:north': {seg:'north',    title:'North shores', sub:'Hāmākua · Kohala',    ord:3},
+  'windward:east':  {seg:'east',     title:'East shores',  sub:'Hilo · Puna',         ord:4}
+};
+const ZONE_NICK = {leeward:'Kona side', windward:'Hilo side'};
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const abbr = w => (String(w).toLowerCase().match(/north|south|east|west/g) || []).map(x => x[0].toUpperCase()).join('');
+const fmt = (d, o) => new Intl.DateTimeFormat('en-US', Object.assign({timeZone: TZ}, o)).format(d);
+const hm = d => fmt(d, {hour:'numeric', minute:'2-digit'});
+const hmShort = d => hm(d).replace(/\s*(AM|PM)/, (m, p) => p === 'AM' ? 'a' : 'p');
+const hst = d => { const x = new Date(d.getTime() - 36e6); return {y:x.getUTCFullYear(), m:x.getUTCMonth(), d:x.getUTCDate(), wd:x.getUTCDay(), h:x.getUTCHours()}; };
+const hstAt = (p, off, h, mi) => new Date(Date.UTC(p.y, p.m, p.d + off, h + 10, mi || 0));
+const validDate = s => { const d = new Date(s); return isNaN(d) ? null : d; };
+function rng(v){
+  const s = String(v == null ? '' : v);
+  const m = s.match(/(\d+)\s*(?:-|–|to)\s*(\d+)/);
+  if (m) return {lo:+m[1], hi:+m[2], txt:m[1] + '–' + m[2]};
+  const n = s.match(/\d+/);
+  if (n) return {lo:+n[0], hi:+n[0], txt:n[0]};
+  return {lo:0, hi:0, txt:s || '—'};
+}
+const level = hi => hi <= 2 ? 1 : hi <= 4 ? 2 : hi <= 7 ? 3 : hi <= 11 ? 4 : 5;
+const zoneKey = name => /leeward/i.test(name || '') ? 'leeward' : 'windward';
+const ago = d => {
+  const m = Math.round((Date.now() - d.getTime()) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + ' min ago';
+  const h = Math.round(m / 60);
+  if (h < 36) return h + ' hr ago';
+  return Math.round(h / 24) + ' days ago';
+};
+const cleanTemp = t => String(t || '').replace(/^In the /i, '').replace(/\.$/, '');
+const noDot = t => String(t || '').replace(/\.$/, '');
+const ft = m => (m * 3.28084);
+
+/* ---------- swell parsing from the NWS discussion ---------- */
+const TRENDS = [
+  [/\b(build|builds|building|rise|rises|rising|increase|increases|increasing|fill|fills|filling|peak|peaks|peaking)\b/i, 'building'],
+  [/\b(hold|holds|holding|persist|persists|remain|remains|steady|maintain|maintains)\b/i, 'holding'],
+  [/\b(decline|declines|declining|lower|lowers|lowering|fade|fades|fading|diminish|diminishes|subside|subsides|ease|eases|easing|drop|drops|dropping|decrease|decreases|decreasing)\b/i, 'declining']
+];
+const WHEN = /\b(through|until|by|into|from|late|early)\b(?:\s+(?:this|the|late|early|next))*\s+(\w+day|tonight|weekend)\b/i;
+function firstTrend(s){
+  let best = null;
+  TRENDS.forEach(([re, name]) => { const m = s.match(re); if (m && (best === null || m.index < best.i)) best = {i:m.index, name}; });
+  return best ? best.name : null;
+}
+function parseSwells(text){
+  const out = [], seen = new Set();
+  const flat = String(text || '').replace(/\s+/g, ' ').trim();
+  const sentences = flat.split(/(?<=\.)\s+/);
+  const re = /\b(?:(long|medium|short)[- ]period\s+)?((?:north|south|east|west)+(?:[- ](?:north|south|east|west)+)*)\s+swell/gi;
+  sentences.forEach(sen => {
+    let m; re.lastIndex = 0;
+    while ((m = re.exec(sen))) {
+      const a = abbr(m[2]);
+      if (!(a in DIRS)) continue;
+      const period = (m[1] || '').toLowerCase();
+      const key = a + '|' + period;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      let trend = firstTrend(sen.slice(m.index + m[0].length));
+      if (!trend) trend = /\b(another|new|next|fresh|arrive|arrives|arriving)\b/i.test(sen) ? 'incoming' : 'in the water';
+      const w = sen.match(WHEN);
+      out.push({dir:a, deg:DIRS[a], period, trend, when: w ? w[0].replace(/^./, c => c.toLowerCase()) : ''});
+    }
+  });
+  const tw = sentences.find(s => /trade wind/i.test(s));
+  if (tw) {
+    const after = tw.slice(tw.search(/trade wind/i));
+    const day = after.match(/\b(\w+day|tonight|weekend)\b/i);
+    out.push({dir:'ENE', deg:DIRS.ENE, period:'trade-wind', trend: firstTrend(after) || 'in the water', when: day ? day[0] : '', trade:true});
+  }
+  return out;
+}
+
+/* ---------- forecast slots ---------- */
+const WD = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+function buildSlots(noaa){
+  const zones = (noaa && noaa.zones) || [];
+  const periods = (zones[0] && zones[0].periods) || [];
+  const issued = validDate(noaa && noaa.issuedISO) || new Date();
+  const base = hst(issued);
+  const slots = [];
+  periods.forEach(p => {
+    const lbl = String(p.label || '').toLowerCase();
+    const tonight = /tonight/.test(lbl);
+    let off = 0;
+    const wi = WD.findIndex(w => lbl.startsWith(w.slice(0, 3)));
+    if (!tonight && !/today/.test(lbl) && wi >= 0) off = ((wi - base.wd) + 7) % 7;
+    (p.cols || []).forEach(c => {
+      const am = /AM/i.test(c);
+      let o = off, h, word;
+      if (tonight) { if (am) { o += 1; h = 3; word = 'Overnight'; } else { h = 20; word = 'Evening'; } }
+      else { h = am ? 9 : 15; word = am ? 'Morning' : 'Afternoon'; }
+      const day = tonight ? 'Tonight' : /today/.test(lbl) ? 'Today' : (p.label || '').slice(0, 3);
+      slots.push({day, word, group: p.label || '', col: String(c).toUpperCase(), t: hstAt(base, o, h)});
+    });
+  });
+  return slots;
+}
+function defaultSlot(slots){
+  const now = Date.now();
+  for (let i = 0; i < slots.length; i++) if (now <= slots[i].t.getTime() + 3 * 36e5) return i;
+  return Math.max(0, slots.length - 1);
+}
+
+/* ---------- island geometry ---------- */
+const PTS = [[20.270,-155.860],[20.205,-155.733],[20.123,-155.585],[20.090,-155.460],[19.990,-155.240],[19.900,-155.125],[19.730,-155.060],[19.735,-155.000],[19.640,-154.920],[19.516,-154.810],[19.355,-154.970],[19.290,-155.140],[19.270,-155.260],[19.135,-155.505],[18.911,-155.681],[19.150,-155.910],[19.380,-155.900],[19.475,-155.925],[19.640,-155.995],[19.730,-156.060],[19.860,-155.935],[19.970,-155.845],[20.040,-155.830],[20.180,-155.900]];
+const LAT0 = 19.59, LON0 = -155.435, S = 208, CX = 210, CY = 240, RING = 198;
+const KX = Math.cos(LAT0 * Math.PI / 180);
+const proj = ([la, lo]) => [CX + (lo - LON0) * KX * S, CY - (la - LAT0) * S];
+const P = PTS.map(proj);
+const n = P.length;
+const f1 = v => v.toFixed(1);
+function edge(i){
+  const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+  const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+  const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+  return 'C' + f1(c1[0]) + ' ' + f1(c1[1]) + ' ' + f1(c2[0]) + ' ' + f1(c2[1]) + ' ' + f1(p2[0]) + ' ' + f1(p2[1]);
+}
+const segPath = edges => 'M' + f1(P[edges[0]][0]) + ' ' + f1(P[edges[0]][1]) + edges.map(edge).join('');
+const range = (a, b) => Array.from({length: b - a + 1}, (_, k) => a + k);
+const ISLAND = segPath(range(0, n - 1)) + 'Z';
+const SEGS = {
+  north:   {edges: range(0, 3),   anchor: P[2]},
+  east:    {edges: range(4, 8),   anchor: P[8]},
+  southSE: {edges: range(9, 13),  anchor: P[12]},
+  southLee:{edges: [14],          anchor: [(P[14][0] + P[15][0]) / 2, (P[14][1] + P[15][1]) / 2]},
+  west:    {edges: range(15, 23), anchor: P[18]}
+};
+const BUOY = proj([19.781, -154.970]);
+const TOWNS = [{name:'Kona', p:P[18], dx:9, anchor:'start'}, {name:'Hilo', p:P[6], dx:-9, anchor:'end'}];
+
+function arrowAt(x1, y1, x2, y2, w, cls){
+  const a = Math.atan2(y2 - y1, x2 - x1), hl = 8 + w * 1.6, hw = 4 + w * 1.1;
+  const bx = x2 - Math.cos(a) * hl, by = y2 - Math.sin(a) * hl;
+  const lx = bx + Math.sin(a) * hw, ly = by - Math.cos(a) * hw;
+  const rx = bx - Math.sin(a) * hw, ry = by + Math.cos(a) * hw;
+  return '<line class="' + cls + '" x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(bx) + '" y2="' + f1(by) + '" stroke-width="' + w + '" stroke-linecap="round"/>' +
+         '<polygon class="' + cls + '-h" points="' + f1(x2) + ',' + f1(y2) + ' ' + f1(lx) + ',' + f1(ly) + ' ' + f1(rx) + ',' + f1(ry) + '"/>';
+}
+const unit = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];
+
+function drawMap(rows, slotIdx, swells, buoy){
+  let s = '<style>' +
+    '.ct{fill:none;stroke:var(--contour)}' +
+    '.rg{fill:none;stroke:var(--rule)}' +
+    '.tk{stroke:var(--ink-3)}' +
+    '.cmp{fill:var(--ink-3);font:500 12px var(--f-mono);letter-spacing:.06em}' +
+    '.isl{fill:var(--land)}' +
+    '.coast{fill:none;stroke-linecap:round;stroke-linejoin:round}' +
+    '.sk{fill:var(--ink-2);font:500 10.5px var(--f-mono);letter-spacing:.1em}' +
+    '.sv{fill:var(--ink);font:700 21px var(--f-display);font-variant-numeric:tabular-nums}' +
+    '.sva{fill:var(--ink-2);font:600 12px var(--f-display)}' +
+    '.town{fill:var(--land-ink);font:500 11px var(--f-mono);letter-spacing:.06em}' +
+    '.td{fill:var(--land-ink)}' +
+    '.sa{stroke:var(--ink)} .sa-h{fill:var(--ink)}' +
+    '.sb{stroke:var(--accent)} .sb-h{fill:var(--accent)}' +
+    '.sd{stroke:var(--ink-3)} .sd-h{fill:var(--ink-3)}' +
+    '.al{fill:var(--ink);font:600 11px var(--f-mono)}' +
+    '.bu{fill:var(--sheet);stroke:var(--accent);stroke-width:2}' +
+    '.bl{fill:var(--accent);font:500 10px var(--f-mono);letter-spacing:.04em}' +
+    '</style>';
+  // compass ring + depth contours
+  s += '<circle class="rg" cx="' + CX + '" cy="' + CY + '" r="' + RING + '" stroke-width="1"/>';
+  for (let d = 0; d < 360; d += 22.5) {
+    const u = unit(d), big = d % 90 === 0;
+    s += '<line class="tk" x1="' + f1(CX + u[0] * RING) + '" y1="' + f1(CY + u[1] * RING) + '" x2="' + f1(CX + u[0] * (RING - (big ? 9 : 5))) + '" y2="' + f1(CY + u[1] * (RING - (big ? 9 : 5))) + '" stroke-width="1"/>';
+  }
+  s += '<text class="cmp" x="' + CX + '" y="' + (CY - RING - 8) + '" text-anchor="middle">N</text>';
+  [1.36, 1.25, 1.15, 1.07].forEach((k, i) => {
+    s += '<path class="ct" d="' + ISLAND + '" transform="translate(' + CX + ' ' + CY + ') scale(' + k + ') translate(' + (-CX) + ' ' + (-CY) + ')" vector-effect="non-scaling-stroke" stroke-width="1" opacity="' + (0.45 + i * 0.18).toFixed(2) + '"/>';
+  });
+  s += '<path class="isl" d="' + ISLAND + '"/>';
+  // coasts
+  const segHas = {};
+  rows.forEach(r => { if (r.seg) segHas[r.seg] = r; });
+  Object.keys(SEGS).forEach(k => {
+    const r = segHas[k];
+    const v = r && r.values[slotIdx];
+    const lv = v ? level(v.hi) : 0;
+    const col = lv ? 'var(--h' + lv + ')' : 'var(--ink-3)';
+    const w = lv ? (3.5 + lv * 1.3) : 1.5;
+    s += '<path class="coast" d="' + segPath(SEGS[k].edges) + '" stroke="' + col + '" stroke-width="' + w + '"/>';
+  });
+  TOWNS.forEach(t => {
+    s += '<circle class="td" cx="' + f1(t.p[0]) + '" cy="' + f1(t.p[1]) + '" r="2.6"/><text class="town" x="' + f1(t.p[0] + t.dx) + '" y="' + f1(t.p[1] + 4) + '" text-anchor="' + t.anchor + '">' + t.name + '</text>';
+  });
+  // swell arrows (from the ring toward the island)
+  (swells || []).forEach(sw => {
+    const u = unit(sw.deg);
+    const w = sw.trade ? 1.6 : sw.period === 'long' ? 3.4 : sw.period === 'medium' ? 2.6 : 2;
+    const cls = (sw.trend === 'declining') ? 'sd' : (sw.trend === 'building' || sw.trend === 'incoming') ? 'sb' : 'sa';
+    const r1 = RING - 2, r2 = RING - 34;
+    s += arrowAt(CX + u[0] * r1, CY + u[1] * r1, CX + u[0] * r2, CY + u[1] * r2, w, cls);
+    const lr = RING - 18, px = -u[1] * 14, py = u[0] * 14;
+    s += '<text class="al" x="' + f1(CX + u[0] * lr + px) + '" y="' + f1(CY + u[1] * lr + py + 4) + '" text-anchor="middle">' + esc(sw.dir) + '</text>';
+  });
+  // buoy
+  if (buoy) {
+    s += '<circle class="bu" cx="' + f1(BUOY[0]) + '" cy="' + f1(BUOY[1]) + '" r="4.5"/>';
+    s += '<text class="bl" x="' + f1(BUOY[0] + 8) + '" y="' + f1(BUOY[1] - 7) + '">BUOY</text>';
+  }
+  // shore labels
+  Object.keys(SEGS).forEach(k => {
+    const r = segHas[k]; if (!r) return;
+    const v = r.values[slotIdx]; if (!v) return;
+    const a = SEGS[k].anchor, dx = a[0] - CX, dy = a[1] - CY, L = Math.hypot(dx, dy) || 1;
+    const nx = dx / L, ny = dy / L, off = 20;
+    const x = a[0] + nx * off, y = a[1] + ny * off;
+    const anc = nx > 0.35 ? 'start' : nx < -0.35 ? 'end' : 'middle';
+    const facing = r.title.split(' ')[0].toUpperCase();
+    s += '<text class="sk" x="' + f1(x) + '" y="' + f1(y - 6) + '" text-anchor="' + anc + '">' + facing + '</text>';
+    s += '<text class="sv" x="' + f1(x) + '" y="' + f1(y + 14) + '" text-anchor="' + anc + '">' + esc(v.txt) + '<tspan class="sva"> ft</tspan></text>';
+  });
+  $('map').innerHTML = s;
+}
+
+function drawLegend(){
+  const items = [['≤2', 1], ['3–4', 2], ['5–7', 3], ['8–11', 4], ['12+', 5]];
+  $('legend').innerHTML = '<span>Coast color = surf face height</span>' + items.map(([t, l]) => '<span><i style="background:var(--h' + l + ')"></i>' + t + ' ft</span>').join('');
+}
+
+/* ---------- small svgs ---------- */
+function dirGlyph(deg, color){
+  const t = (deg + 180) % 360;
+  return '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><g transform="rotate(' + t + ' 9 9)"><line x1="9" y1="15" x2="9" y2="5" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/><polygon points="9,2 4.8,7.4 13.2,7.4" fill="' + color + '"/></g></svg>';
+}
+function tideChart(st, now){
+  const ev = (st.events || []).map(e => Object.assign({}, e, {d: validDate(e.t)})).filter(e => e.d && isFinite(+e.ft)).sort((a, b) => a.d - b.d);
+  if (ev.length < 2) return '';
+  const W = 330, H = 132, pl = 4, pr = 4, pt = 20, pb = 34;
+  const t0 = ev[0].d.getTime(), t1 = ev[ev.length - 1].d.getTime();
+  const hs = ev.map(e => +e.ft), y0 = Math.min(...hs) - 0.3, y1 = Math.max(...hs) + 0.3;
+  const X = t => pl + (t - t0) / (t1 - t0) * (W - pl - pr);
+  const Y = h => pt + (1 - (h - y0) / (y1 - y0)) * (H - pt - pb);
+  let line = '';
+  for (let k = 0; k < ev.length - 1; k++) {
+    const a = ev[k], b = ev[k + 1], ta = a.d.getTime(), tb = b.d.getTime();
+    for (let j = (k === 0 ? 0 : 1); j <= 24; j++) {
+      const f = j / 24, h = +a.ft + (+b.ft - +a.ft) * (1 - Math.cos(Math.PI * f)) / 2;
+      line += (line ? 'L' : 'M') + f1(X(ta + (tb - ta) * f)) + ' ' + f1(Y(h));
+    }
+  }
+  const base = H - pb;
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Tide curve for ' + esc(st.station) + '">';
+  s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + base + '" y2="' + base + '" stroke="var(--rule)"/>';
+  // midnights
+  let m = hst(ev[0].d), mid = hstAt(m, 1, 0);
+  while (mid.getTime() < t1) {
+    const x = X(mid.getTime());
+    s += '<line x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + (pt - 6) + '" y2="' + base + '" stroke="var(--rule)" stroke-dasharray="2 3"/>';
+    s += '<text x="' + f1(x + 4) + '" y="' + (H - 3) + '" fill="var(--ink-3)" style="font:500 9.5px var(--f-mono);letter-spacing:.08em">' + fmt(mid, {weekday:'short'}).toUpperCase() + '</text>';
+    m = hst(mid); mid = hstAt(m, 1, 0);
+  }
+  s += '<path d="' + line + 'L' + f1(X(t1)) + ' ' + base + 'L' + f1(X(t0)) + ' ' + base + 'Z" fill="var(--accent-soft)"/>';
+  s += '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2"/>';
+  if (now >= t0 && now <= t1) {
+    const x = X(now);
+    s += '<line x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + (pt - 10) + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.2"/>';
+    s += '<text x="' + f1(x) + '" y="' + (pt - 12) + '" text-anchor="middle" fill="var(--ink)" style="font:600 9.5px var(--f-mono);letter-spacing:.1em">NOW</text>';
+  }
+  ev.forEach((e, i) => {
+    const x = X(e.d.getTime()), y = Y(+e.ft), hi = /high/i.test(e.type);
+    const anc = i === 0 ? 'start' : i === ev.length - 1 ? 'end' : 'middle';
+    s += '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="3" fill="var(--sheet)" stroke="var(--accent)" stroke-width="1.6"/>';
+    const ly = hi ? y - 8 : y + 16;
+    s += '<text x="' + f1(x) + '" y="' + f1(ly) + '" text-anchor="' + anc + '" fill="var(--ink)" style="font:500 10px var(--f-mono)">' + (+e.ft).toFixed(1) + '′ <tspan fill="var(--ink-2)">' + hmShort(e.d) + '</tspan></text>';
+  });
+  return s + '</svg>';
+}
+function buoyDial(b){
+  const c = 64, r = 52;
+  let s = '<svg viewBox="0 0 128 128" role="img" aria-label="Measured swell and wind-wave directions">';
+  s += '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="var(--sea)" stroke="var(--rule)"/>';
+  ['N', 'E', 'S', 'W'].forEach((l, i) => {
+    const u = unit(i * 90);
+    s += '<text x="' + f1(c + u[0] * (r - 10)) + '" y="' + f1(c + u[1] * (r - 10) + 4) + '" text-anchor="middle" fill="var(--ink-3)" style="font:500 10px var(--f-mono)">' + l + '</text>';
+  });
+  const add = (deg, w, cls) => { if (deg == null) return; const u = unit(deg); s += arrowAt(c + u[0] * (r - 2), c + u[1] * (r - 2), c + u[0] * 8, c + u[1] * 8, w, cls); };
+  s += '<style>.dw{stroke:var(--ink-3)}.dw-h{fill:var(--ink-3)}.ds{stroke:var(--accent)}.ds-h{fill:var(--accent)}</style>';
+  add(b.wwd in DIRS ? DIRS[b.wwd] : null, 2, 'dw');
+  add(b.swd in DIRS ? DIRS[b.swd] : (isFinite(b.mwdDeg) ? +b.mwdDeg : null), 3.4, 'ds');
+  return s + '</svg>';
+}
+
+/* ---------- render ---------- */
+const state = {data:null, slots:[], slot:0, userPicked:false, rows:[], swells:[]};
+
+function buildRows(noaa){
+  const rows = [];
+  ((noaa && noaa.zones) || []).forEach(z => {
+    const zk = zoneKey(z.name);
+    (z.shores || []).forEach(sh => {
+      const facing = String(sh.facing || '').toLowerCase().split(/\s/)[0];
+      const def = SHORES[zk + ':' + facing] || {seg:null, title: (sh.facing || '').replace(/\s*facing/i, '') + ' shores', sub: ZONE_NICK[zk], ord: 9};
+      rows.push(Object.assign({zone: zk, values: (sh.values || []).map(rng)}, def));
+    });
+  });
+  return rows.sort((a, b) => a.ord - b.ord);
+}
+
+function renderTable(){
+  const slots = state.slots, rows = state.rows;
+  const groups = [];
+  slots.forEach(s => { const g = groups[groups.length - 1]; if (g && g.label === s.group) g.n++; else groups.push({label: s.group, n: 1}); });
+  let h = '<thead><tr><th class="sh" rowspan="2" scope="col">Shore</th>' +
+    groups.map(g => '<th class="grp" colspan="' + g.n + '" scope="colgroup">' + esc(g.label) + '</th>').join('') + '</tr><tr>' +
+    slots.map((s, k) => '<th scope="col"><button class="tc" data-k="' + k + '" aria-pressed="false" aria-label="Show ' + esc(s.group + ' ' + s.col) + ' on the map">' + esc(s.col) + '</button></th>').join('') +
+    '</tr></thead><tbody>';
+  rows.forEach(r => {
+    h += '<tr><th scope="row"><b>' + esc(r.title.replace(/\s*shores$/i, '')) + '</b><span>' + esc(r.sub) + '</span></th>';
+    slots.forEach((s, k) => {
+      const v = r.values[k];
+      h += v ? '<td data-k="' + k + '" style="--c:var(--h' + level(v.hi) + ')">' + esc(v.txt) + '</td>' : '<td data-k="' + k + '" style="--c:var(--rule)">—</td>';
+    });
+    h += '</tr>';
+  });
+  $('fc').innerHTML = h + '</tbody>';
+}
+
+function renderSlotDependent(){
+  const i = state.slot, sl = state.slots[i];
+  $('fc').querySelectorAll('.tc').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === i)));
+  $('fc').querySelectorAll('td[data-k]').forEach(td => td.classList.toggle('on', +td.dataset.k === i));
+  $('showing').innerHTML = sl ? 'Map shows <b>' + esc(sl.group + ' ' + sl.col) + '</b>' : 'Surf heights by shore';
+  drawMap(state.rows, i, state.swells, state.data && state.data.buoy);
+}
+
+function render(){
+  const d = state.data || {}, noaa = d.noaa || {};
+  // header
+  $('issued').textContent = noaa.issued ? 'Issued ' + noaa.issued : 'Forecast time unknown';
+  updateFresh();
+  // lede
+  $('discussion').textContent = noaa.discussion || 'No discussion in this issuance.';
+  state.swells = parseSwells(noaa.discussion);
+  $('swells').innerHTML = state.swells.map(sw => {
+    const col = sw.trend === 'declining' ? 'var(--ink-3)' : (sw.trend === 'building' || sw.trend === 'incoming') ? 'var(--accent)' : 'var(--ink)';
+    const name = sw.trade ? 'Trade-wind chop' : (sw.period ? sw.period + '-period swell' : 'swell');
+    return '<span class="swell' + (sw.trend === 'declining' ? ' dim' : '') + '">' + dirGlyph(sw.deg, col) + '<span><b>' + esc(sw.dir) + '</b> ' + esc(name) + '<br><span class="tr">' + esc(sw.trend) + (sw.when ? ' ' + esc(sw.when) : '') + '</span></span></span>';
+  }).join('');
+  $('product').textContent = [noaa.header, 'SRFHFO'].filter(Boolean).join(' · ');
+  // slots
+  state.rows = buildRows(noaa);
+  state.slots = buildSlots(noaa);
+  if (!state.userPicked || state.slot >= state.slots.length) state.slot = defaultSlot(state.slots);
+  renderTable();
+  renderSlotDependent();
+  renderZones(noaa);
+  renderBuoy(d.buoy);
+  renderBin(d.bin);
+}
+
+function renderZones(noaa){
+  const zones = ((noaa && noaa.zones) || []).slice().sort((a, b) => (zoneKey(a.name) === 'leeward' ? 0 : 1) - (zoneKey(b.name) === 'leeward' ? 0 : 1));
+  const now = Date.now();
+  $('zones').innerHTML = zones.map(z => {
+    const zk = zoneKey(z.name);
+    const days = z.days || [];
+    const sunDay = days.find(x => x.sunrise || x.sunset);
+    const tides = z.tides || [];
+    const main = tides[0], rest = tides.slice(1);
+    return '<article class="card"><div class="card-h"><h3>' + esc(ZONE_NICK[zk]) + '</h3><p>' + esc(z.name) + '</p></div>' +
+      '<div class="periods">' + days.map(p =>
+        '<div class="period"><span class="pl">' + esc(p.label) + '</span><span class="wx">' + esc(p.weather) + '</span><dl>' +
+        '<div><dt>' + esc(p.tempLabel || 'Temp') + '</dt><dd>' + esc(cleanTemp(p.temp)) + '</dd></div>' +
+        '<div><dt>Wind</dt><dd>' + esc(noDot(p.winds)) + '</dd></div></dl></div>').join('') + '</div>' +
+      (main ? '<div class="tide"><h4>Tide · ' + esc(main.station) + '</h4>' + tideChart(main, now) +
+        rest.map(st => '<p class="more">' + esc(st.station) + ': ' + (st.events || []).map(e => { const dt = validDate(e.t); return (/high/i.test(e.type) ? 'H ' : 'L ') + (+e.ft).toFixed(1) + '′ ' + (dt ? hmShort(dt) : ''); }).join(' · ') + '</p>').join('') + '</div>' : '') +
+      (sunDay ? '<div class="sun"><span>Sunrise ' + esc(sunDay.sunrise || '—') + '</span><span>Sunset ' + esc(sunDay.sunset || '—') + '</span><span>' + esc(sunDay.label || '') + '</span></div>' : '') +
+      '</article>';
+  }).join('');
+}
+
+function renderBuoy(b){
+  if (!b) { $('buoy').innerHTML = '<span class="skel">No buoy reading stored yet.</span>'; $('buoy-t').textContent = ''; return; }
+  const t = validDate(b.t);
+  const old = t && (Date.now() - t.getTime()) > 6 * 36e5;
+  $('buoy-t').textContent = 'NOAA ' + (b.station || '51206') + (t ? ' · ' + fmt(t, {weekday:'short'}) + ' ' + hm(t) : '') + (old ? ' · older reading' : '');
+  const per = +b.swpS, kind = !isFinite(per) ? '' : per >= 13 ? 'long-period groundswell' : per >= 9 ? 'mid-period swell' : 'short-period windswell';
+  const stat = (lab, val, unitTxt, sub, key) => '<div class="stat"><dt>' + (key ? '<span class="key" style="background:' + key + '"></span>' : '') + lab + '</dt><dd><span class="n">' + val + '<small>' + unitTxt + '</small></span><span class="s">' + sub + '</span></dd></div>';
+  let h = '<div class="dial">' + buoyDial(b) + '</div><dl class="stats">';
+  if (isFinite(b.swhM)) h += stat('Swell', ft(b.swhM).toFixed(1), 'ft', (isFinite(per) ? per.toFixed(0) + ' s · ' : '') + 'from ' + esc(b.swd || '—') + (kind ? '<br>' + kind : ''), 'var(--accent)');
+  if (isFinite(b.wwhM)) h += stat('Wind waves', ft(b.wwhM).toFixed(1), 'ft', (isFinite(b.wwpS) ? (+b.wwpS).toFixed(0) + ' s · ' : '') + 'from ' + esc(b.wwd || '—'), 'var(--ink-3)');
+  if (isFinite(b.wvhtM)) h += stat('Combined seas', ft(b.wvhtM).toFixed(1), 'ft', 'significant height' + (isFinite(b.mwdDeg) ? ' · ' + Math.round(b.mwdDeg) + '°' : ''));
+  if (isFinite(b.wtmpC)) h += stat('Water', (b.wtmpC * 9 / 5 + 32).toFixed(0), '°F', (+b.wtmpC).toFixed(1) + ' °C');
+  $('buoy').innerHTML = h + '</dl>';
+}
+
+function renderBin(bin){
+  if (!bin || !bin.paragraphs || !bin.paragraphs.length) { $('bin').innerHTML = '<p class="skel">No Big Island Now summary stored yet.</p>'; return; }
+  $('bin').innerHTML = '<div class="src">Big Island Now · ' + esc(bin.title || 'Swell summary') + '</div>' + bin.paragraphs.map(p => '<p>' + esc(p) + '</p>').join('');
+}
+
+function nextRefresh(){
+  const now = new Date();
+  for (let k = 0; k < 30; k++) {
+    const t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours() + k, REFRESH_MIN + 10));
+    if (t > now && REFRESH_UTC_HOURS.includes(t.getUTCHours())) return t;
+  }
+  return null;
+}
+function updateFresh(){
+  const d = state.data, el = $('fresh');
+  const u = d && validDate(d.updatedAt);
+  if (!u) return;
+  const age = Date.now() - u.getTime();
+  el.className = 'pill ' + (age < 8 * 36e5 ? 'ok' : 'warn');
+  el.textContent = 'Updated ' + ago(u);
+  const nx = nextRefresh();
+  if (nx) $('sched').textContent = 'Refreshes automatically about every 3 hours. NWS Honolulu issues a new surf forecast each morning and afternoon. Next refresh around ' + hm(nx) + ' HST.';
+}
+
+function showState(title, detail){
+  $('state').hidden = false; $('state-t').textContent = title; $('state-d').textContent = detail;
+}
+
+$('fc').addEventListener('click', e => {
+  const b = e.target.closest('.tc, td[data-k]'); if (!b) return;
+  state.slot = +b.dataset.k; state.userPicked = true; renderSlotDependent();
+});
+
+/* first frame: island, legend, empty shores */
+drawLegend();
+drawMap([], 0, [], null);
+setInterval(updateFresh, 60000);
+
+async function load(){
+  try {
+    const r = await fetch('data.json?t=' + Date.now(), {cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const next = await r.json();
+    if (state.data && next.updatedAt === state.data.updatedAt) { updateFresh(); return; }
+    state.data = next;
+    $('state').hidden = true;
+    try { render(); } catch (err) { console.error(err); showState('Part of the forecast couldn\u2019t be drawn.', 'The stored data has an unexpected shape. The next refresh should fix it.'); }
+  } catch (e) {
+    if (!state.data) { showState('The forecast couldn\u2019t load.', 'Check your connection and reload the page.'); $('fresh').textContent = 'Offline'; }
+  }
+}
+load();
+setInterval(load, 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+
+/* expose pure helpers for testing */
+window.__surf = {parseSwells, rng, buildSlots};
+})();
+</script>
+</body>
+</html>

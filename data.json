@@ -1,0 +1,293 @@
+{
+ "updatedAt": "2026-10-14T17:51:27Z",
+ "noaa": {
+  "header": "FZHW52 PHFO 141352",
+  "issued": "352 AM HST Wed Oct 14 2026",
+  "issuedISO": "2026-10-14T03:52:00-10:00",
+  "discussion": "The current medium period northwest swell will linger today, holding surf to near near or slightly above seasonal average for north and west facing shores, before declining tonight through Friday. By late Friday, a medium period north- northwest swell will build and once again help bring surf back to near seasonal averages through the weekend. The current medium period south swell will keep surf along south facing shores elevated today. A reinforcing long period south swell will help produce surf near seasonal average tonight into early this weekend. Surf along east facing shores will remain small through Thursday as small wind waves and tiny east swell persist. Choppy surf will increase slightly as trade winds strengthen across the region Friday into the weekend.",
+  "zones": [
+   {
+    "key": "windward",
+    "name": "Big Island Windward and Southeast",
+    "periods": [
+     {
+      "label": "Today",
+      "cols": [
+       "AM",
+       "PM"
+      ]
+     },
+     {
+      "label": "Thursday",
+      "cols": [
+       "AM",
+       "PM"
+      ]
+     }
+    ],
+    "shores": [
+     {
+      "facing": "North",
+      "values": [
+       "2-4",
+       "1-3",
+       "1-3",
+       "1-3"
+      ]
+     },
+     {
+      "facing": "East",
+      "values": [
+       "2-4",
+       "2-4",
+       "2-4",
+       "3-5"
+      ]
+     },
+     {
+      "facing": "South",
+      "values": [
+       "5-7",
+       "5-7",
+       "5-7",
+       "5-7"
+      ]
+     }
+    ],
+    "days": [
+     {
+      "label": "Today",
+      "weather": "Mostly sunny. Isolated showers.",
+      "tempLabel": "High",
+      "temp": "In the lower 80s.",
+      "winds": "East winds 5 to 10 mph.",
+      "sunrise": "6:14 AM",
+      "sunset": "5:58 PM"
+     },
+     {
+      "label": "Tonight",
+      "weather": "Mostly cloudy. Numerous showers.",
+      "tempLabel": "Low",
+      "temp": "In the lower 70s.",
+      "winds": "Northeast winds around 5 mph, becoming north after midnight.",
+      "sunrise": null,
+      "sunset": null
+     },
+     {
+      "label": "Thursday",
+      "weather": "Partly sunny. Scattered showers.",
+      "tempLabel": "High",
+      "temp": "In the lower 80s.",
+      "winds": "Northeast winds 5 to 10 mph.",
+      "sunrise": "6:15 AM",
+      "sunset": "5:57 PM"
+     }
+    ],
+    "tides": [
+     {
+      "station": "Hilo Bay",
+      "events": [
+       {
+        "type": "Low",
+        "ft": 1.0,
+        "t": "2026-10-14T12:03:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.4,
+        "t": "2026-10-14T16:05:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.2,
+        "t": "2026-10-14T22:30:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 2.4,
+        "t": "2026-10-15T06:10:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 1.1,
+        "t": "2026-10-15T13:05:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.2,
+        "t": "2026-10-15T16:14:00-10:00"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "leeward",
+    "name": "Big Island Leeward",
+    "periods": [
+     {
+      "label": "Today",
+      "cols": [
+       "AM",
+       "PM"
+      ]
+     },
+     {
+      "label": "Thursday",
+      "cols": [
+       "AM",
+       "PM"
+      ]
+     }
+    ],
+    "shores": [
+     {
+      "facing": "West",
+      "values": [
+       "2-4",
+       "2-4",
+       "2-4",
+       "2-4"
+      ]
+     },
+     {
+      "facing": "South",
+      "values": [
+       "4-6",
+       "4-6",
+       "4-6",
+       "4-6"
+      ]
+     }
+    ],
+    "days": [
+     {
+      "label": "Today",
+      "weather": "Mostly sunny. Isolated showers.",
+      "tempLabel": "High",
+      "temp": "In the mid 80s.",
+      "winds": "Light and variable winds, becoming west around 5 mph in the afternoon.",
+      "sunrise": "6:18 AM",
+      "sunset": "6:02 PM"
+     },
+     {
+      "label": "Tonight",
+      "weather": "Partly cloudy. Isolated showers.",
+      "tempLabel": "Low",
+      "temp": "Around 70.",
+      "winds": "North winds around 5 mph.",
+      "sunrise": null,
+      "sunset": null
+     },
+     {
+      "label": "Thursday",
+      "weather": "Mostly sunny. Isolated showers.",
+      "tempLabel": "High",
+      "temp": "In the upper 80s.",
+      "winds": "Northwest winds around 5 mph.",
+      "sunrise": "6:19 AM",
+      "sunset": "6:01 PM"
+     }
+    ],
+    "tides": [
+     {
+      "station": "Kona",
+      "events": [
+       {
+        "type": "High",
+        "ft": 2.0,
+        "t": "2026-10-14T06:03:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.7,
+        "t": "2026-10-14T12:40:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.1,
+        "t": "2026-10-14T16:43:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.1,
+        "t": "2026-10-14T23:07:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.9,
+        "t": "2026-10-15T06:48:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.7,
+        "t": "2026-10-15T13:42:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.0,
+        "t": "2026-10-15T16:52:00-10:00"
+       }
+      ]
+     },
+     {
+      "station": "Kawaihae",
+      "events": [
+       {
+        "type": "High",
+        "ft": 2.3,
+        "t": "2026-10-14T06:14:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.6,
+        "t": "2026-10-14T13:26:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 0.9,
+        "t": "2026-10-14T17:40:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.2,
+        "t": "2026-10-14T23:19:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 2.2,
+        "t": "2026-10-15T06:57:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.6,
+        "t": "2026-10-15T14:31:00-10:00"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "buoy": {
+  "station": "51206",
+  "name": "Hilo, HI",
+  "t": "2026-10-14T07:26:00-10:00",
+  "wvhtM": 2.1,
+  "swhM": 1.6,
+  "swpS": 14.3,
+  "swd": "NNW",
+  "wwhM": 1.4,
+  "wwpS": 9.9,
+  "wwd": "NE",
+  "mwdDeg": 335.0,
+  "wtmpC": 27.4
+ },
+ "bin": {
+  "title": "Hawaii County Surf Forecast for October 14, 2026",
+  "url": "https://bigislandnow.com/surf/",
+  "paragraphs": [
+   "The current long period northwest swell will hold through Wednesday, and then decline Thursday and Friday. By late Friday, a medium period north-northwest swell will build, bringing surf to near seasonal averages through the weekend. The current long period south-southwest swell will slowly decline through Wednesday. Another long period south swell will help produce surf near seasonal average Thursday into early this weekend. Surf along east facing shores will remain small through Thursday, and then increase and become choppy as trade winds increase Friday and into the weekend."
+  ]
+ }
+}
