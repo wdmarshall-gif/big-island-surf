@@ -79,8 +79,10 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .lede{display:grid; gap:14px}
 .discussion{margin:0; font-size:1.06rem; line-height:1.6; max-width:64ch}
 .product{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); letter-spacing:.04em}
-.swells{display:flex; flex-wrap:wrap; gap:8px}
-.swell{display:inline-flex; align-items:center; gap:8px; padding:6px 12px 6px 8px; border:1px solid var(--rule); border-radius:999px; background:var(--sheet); font-size:13px; line-height:1.25}
+.swells{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:6px}
+.swell{display:flex; align-items:flex-start; gap:7px; padding:7px 10px 7px 7px; border-radius:10px; background:var(--sea); font-size:12.5px; line-height:1.3; min-width:0}
+.swell svg{margin-top:1px; width:18px; height:18px}
+.arrow-key svg{width:16px; height:16px; flex:none}
 .swell svg{flex:none}
 .swell b{font-family:var(--f-mono); font-weight:500; font-size:13px}
 .swell .tr{color:var(--ink-2)}
@@ -91,9 +93,12 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .sec-h h2{font-family:var(--f-display); font-weight:700; font-size:1.9rem; line-height:1; text-transform:uppercase; letter-spacing:.02em}
 .surf{display:grid; gap:12px}
 .map{margin:0 auto; width:100%; max-width:600px; background:var(--sheet); border:1px solid var(--rule); border-radius:var(--r); padding:10px 8px 12px; min-width:0}
-.map svg{display:block; width:100%; height:auto; max-width:100%}
+.map > svg{display:block; width:100%; height:auto; max-width:100%}
 .showing{display:flex; justify-content:center; align-items:baseline; gap:8px; font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2)}
 .showing b{font-family:var(--f-body); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink); font-weight:600}
+.map-key{display:grid; gap:10px; padding:2px 4px 0}
+.arrow-key{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 12px; font-family:var(--f-mono); font-size:11px; color:var(--ink-2); border-top:1px solid var(--rule); padding-top:10px}
+.arrow-key span{display:inline-flex; align-items:center; gap:5px}
 .legend{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; font-family:var(--f-mono); font-size:11px; color:var(--ink-2)}
 .legend i{display:inline-block; width:14px; height:4px; border-radius:2px; vertical-align:middle; margin-right:5px}
 
@@ -179,7 +184,11 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
     <figure class="map">
       <div class="showing" id="showing">Surf heights by shore</div>
       <svg id="map" viewBox="0 0 420 470" role="img" aria-label="Map of Hawaiʻi Island with coastlines colored by forecast surf height and arrows for incoming swells"></svg>
-      <figcaption class="legend" id="legend"></figcaption>
+      <figcaption class="map-key">
+        <div class="legend" id="legend"></div>
+        <div class="arrow-key" id="arrow-key">Arrows point the way each swell travels</div>
+        <div class="swells" id="swells" aria-label="Swells shown by the map arrows"></div>
+      </figcaption>
     </figure>
     <div class="table-wrap"><table class="fc" id="fc" aria-label="Forecast surf heights in feet by shore and time"></table></div>
     <p class="hint">Wave-face heights in feet. Tap a time to show it on the map.</p>
@@ -188,7 +197,6 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
   <section class="lede" aria-labelledby="out-h">
     <div class="sec-h"><h2 id="out-h">Swell outlook</h2></div>
     <p class="discussion" id="discussion"><span class="skel">The NWS forecaster's discussion of incoming swells and trade winds appears here.</span></p>
-    <div class="swells" id="swells" aria-label="Swells in the forecast"></div>
     <div class="product" id="product"></div>
   </section>
 
@@ -483,6 +491,8 @@ function drawMap(rows, slotIdx, swells, buoy){
 function drawLegend(){
   const items = [['≤2', 1], ['3–4', 2], ['5–7', 3], ['8–11', 4], ['12+', 5]];
   $('legend').innerHTML = '<span>Coast color = surf face height</span>' + items.map(([t, l]) => '<span><i style="background:var(--h' + l + ')"></i>' + t + ' ft</span>').join('');
+  $('arrow-key').innerHTML = '<span>Arrows = swells, pointing the way they travel</span>' +
+    [['var(--accent)', 'building'], ['var(--ink)', 'holding'], ['var(--ink-3)', 'fading']].map(([c, t]) => '<span>' + dirGlyph(180, c) + t + '</span>').join('');
 }
 
 /* ---------- small svgs ---------- */
