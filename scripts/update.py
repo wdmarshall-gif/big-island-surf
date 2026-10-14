@@ -251,6 +251,29 @@ def rnd(values, nd=0):
     return [None if v is None else (round(v, nd) if nd else int(round(v))) for v in values]
 
 
+def daytime_wind(h):
+    """Per day: strongest morning (6-11 am) and afternoon (noon-5 pm) wind, with its direction."""
+    out = {}
+    for t, spd, wdir, gst in zip(h["time"], h["wind_speed_10m"], h["wind_direction_10m"], h["wind_gusts_10m"]):
+        if spd is None:
+            continue
+        date, hour = t[:10], int(t[11:13])
+        part = "am" if 6 <= hour <= 11 else "pm" if 12 <= hour <= 17 else None
+        if not part:
+            continue
+        day = out.setdefault(date, {})
+        if day.get(part + "Mph") is None or spd > day[part + "Mph"]:
+            day[part + "Mph"], day[part + "Dir"] = spd, wdir
+        if gst is not None and gst > day.get("gustMph", -1):
+            day["gustMph"] = gst
+    for day in out.values():
+        for k in list(day):
+            if day[k] is not None:
+                day[k] = int(round(day[k]))
+        day["windMph"] = max(day.get("amMph", 0), day.get("pmMph", 0))
+    return out
+
+
 def fetch_side(sd):
     marine = None
     for lat, lon in sd["sea"]:
@@ -269,29 +292,25 @@ def fetch_side(sd):
         raise ValueError("no wave data near %s" % sd["name"])
     wind = om(WEATHER_API, {
         "latitude": sd["wind"][0], "longitude": sd["wind"][1],
-        "daily": "wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant",
+        "hourly": "wind_speed_10m,wind_direction_10m,wind_gusts_10m",
         "wind_speed_unit": "mph", "timezone": "Pacific/Honolulu", "forecast_days": 7,
     })
     d, du = marine["daily"], marine.get("daily_units", {})
     h, hu = marine["hourly"], marine.get("hourly_units", {})
-    w = wind["daily"]
+    wind_by_day = daytime_wind(wind["hourly"])
     swell = to_ft(d["swell_wave_height_max"], du.get("swell_wave_height_max"))
     wwave = to_ft(d["wind_wave_height_max"], du.get("wind_wave_height_max"))
     seas = to_ft(d["wave_height_max"], du.get("wave_height_max"))
     sdir, sper = rnd(d["swell_wave_direction_dominant"]), rnd(d["swell_wave_period_max"])
-    wspd, wgst, wdir = rnd(w["wind_speed_10m_max"]), rnd(w["wind_gusts_10m_max"]), rnd(w["wind_direction_10m_dominant"])
-    wdates = w["time"]
     days = []
     for i, date in enumerate(d["time"]):
-        j = wdates.index(date) if date in wdates else None
-        days.append({
+        day = {
             "date": date,
             "swellFt": swell[i], "swellDir": sdir[i], "swellPer": sper[i],
             "windWaveFt": wwave[i], "seasFt": seas[i],
-            "windMph": wspd[j] if j is not None else None,
-            "gustMph": wgst[j] if j is not None else None,
-            "windDir": wdir[j] if j is not None else None,
-        })
+        }
+        day.update(wind_by_day.get(date, {}))
+        days.append(day)
     return {
         "key": sd["key"], "name": sd["name"], "faces": sd["faces"],
         "sea": {"lat": at[0], "lon": at[1]}, "windAt": {"lat": sd["wind"][0], "lon": sd["wind"][1]},
@@ -349,8 +368,9 @@ def main(argv):
     noaa = data.get("noaa", {})
     log("wrote %s: sources ok=%s, NWS issued %s" % (OUT, ",".join(ok), noaa.get("issued")))
     for sd in data.get("outlook", {}).get("sides", []):
-        log("  %s: %s" % (sd["name"], ", ".join("%s %sft/%ss/%s wind %s" % (
-            x["date"][5:], x["swellFt"], x["swellPer"], x["swellDir"], x["windMph"]) for x in sd["days"])))
+        log("  %s: %s" % (sd["name"], ", ".join("%s %sft/%ss/%s am %s@%s pm %s@%s" % (
+            x["date"][5:], x["swellFt"], x["swellPer"], x["swellDir"],
+            x.get("amMph"), x.get("amDir"), x.get("pmMph"), x.get("pmDir")) for x in sd["days"])))
     return 0
 
 

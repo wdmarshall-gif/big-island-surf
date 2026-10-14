@@ -146,7 +146,7 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .ol-key i{display:inline-block; width:16px; height:0; vertical-align:middle; margin-right:5px; border-top:3px solid var(--accent)}
 .ol-key i.k-ww{border-top:2px dashed var(--ink-3)}
 .od-list{list-style:none; margin:0; padding:0}
-.od{display:grid; grid-template-columns:50px minmax(0,1fr) 108px; gap:12px; align-items:center; padding:11px 0; border-bottom:1px solid var(--rule)}
+.od{display:grid; grid-template-columns:46px minmax(0,1fr) auto; gap:12px; align-items:center; padding:11px 0; border-bottom:1px solid var(--rule)}
 .od:first-child{border-top:1px solid var(--rule)}
 .od-day b{display:block; font-weight:700; font-size:15px; line-height:1.2}
 .od-day span{font-family:var(--f-mono); font-size:11px; color:var(--ink-3)}
@@ -159,12 +159,11 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .od-bar{height:6px; border-radius:3px; background:var(--rule); overflow:hidden}
 .od-bar i{display:block; height:100%; border-radius:3px; background:var(--accent)}
 .od-hit{font-size:12.5px; color:var(--ink-2); line-height:1.3}
-.od-wind{display:grid; gap:3px; justify-items:end; text-align:right}
-.od-wind .w{display:flex; align-items:center; gap:5px; font-family:var(--f-display); font-weight:700; font-size:1.3rem; line-height:1; font-variant-numeric:tabular-nums}
-.od-wind .w svg{width:14px; height:14px}
-.od-wind .w small{font-family:var(--f-body); font-weight:500; font-size:11px; color:var(--ink-2)}
-.od-wd{font-family:var(--f-mono); font-size:11px; color:var(--ink-2); white-space:nowrap}
-.wchip{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; padding:2px 6px; border-radius:4px; background:var(--rule); color:var(--ink-2); white-space:nowrap}
+.od-wind{display:grid; grid-template-columns:auto 14px auto auto; align-items:center; gap:6px 5px; justify-content:end}
+.od-wind .wl-l{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.06em; color:var(--ink-3)}
+.od-wind svg{width:14px; height:14px}
+.od-wind b{font-family:var(--f-display); font-weight:700; font-size:1.15rem; line-height:1; font-variant-numeric:tabular-nums; text-align:right; min-width:1.4em}
+.wchip{font-family:var(--f-mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; padding:2px 5px; text-align:center; min-width:66px; box-sizing:border-box; border-radius:4px; background:var(--rule); color:var(--ink-2); white-space:nowrap}
 .wchip.off{background:color-mix(in srgb, var(--ok) 18%, transparent); color:var(--ok)}
 .wchip.on{background:color-mix(in srgb, var(--warn) 20%, transparent); color:var(--warn)}
 .ol-note{margin:0; font-size:12.5px; color:var(--ink-2); max-width:72ch}
@@ -668,7 +667,7 @@ function windKind(dirFrom, mph, faces){
   if (mph == null || dirFrom == null) return null;
   if (mph < 7) return {k: 'light', t: 'light'};
   const d = angDiff(dirFrom, faces + 180);
-  return d <= 60 ? {k: 'off', t: 'offshore'} : d >= 120 ? {k: 'on', t: 'onshore'} : {k: 'cross', t: 'cross-shore'};
+  return d <= 60 ? {k: 'off', t: 'offshore'} : d >= 120 ? {k: 'on', t: 'onshore'} : {k: 'cross', t: 'cross'};
 }
 const dayDate = iso => new Date(iso + 'T12:00:00-10:00');
 const dayLong = (d, i) => i === 0 ? 'today' : fmt(dayDate(d.date), {weekday: 'long'});
@@ -737,12 +736,18 @@ function outlookChart(side){
   return s + '</svg>';
 }
 
+function windLine(label, dir, mph, faces){
+  const k = windKind(dir, mph, faces);
+  return '<span class="wl-l">' + label + '</span>' + (dir != null ? dirGlyph(dir, 'var(--ink-2)') : '<span></span>') +
+    '<b title="' + compass(dir) + ' ' + (mph != null ? mph + ' mph' : '') + '">' + (mph != null ? mph : '\u2014') + '</b>' +
+    (k ? '<span class="wchip ' + k.k + '">' + k.t + '</span>' : '<span></span>');
+}
+
 function outlookRows(side){
   const maxFt = Math.max(3, ...side.days.map(d => d.swellFt || 0));
   return side.days.map((d, i) => {
     const dt = dayDate(d.date);
     const wk = i === 0 ? 'Today' : fmt(dt, {weekday: 'short'});
-    const wkind = windKind(d.windDir, d.windMph, side.faces);
     const pct = d.swellFt != null ? Math.max(4, d.swellFt / maxFt * 100) : 0;
     return '<li class="od"><div class="od-day"><b>' + wk + '</b><span>' + fmt(dt, {month: 'short', day: 'numeric'}) + '</span></div>' +
       '<div class="od-sw"><div class="od-top">' + (d.swellDir != null ? dirGlyph(d.swellDir, 'var(--accent)') : '') +
@@ -750,9 +755,10 @@ function outlookRows(side){
         '<span class="m">' + (d.swellPer != null ? d.swellPer + ' s \u00b7 ' : '') + compass(d.swellDir) + '</span></div>' +
         '<div class="od-bar"><i style="width:' + pct.toFixed(0) + '%"></i></div>' +
         '<div class="od-hit">' + esc(shoreHit(d.swellDir)) + '</div></div>' +
-      '<div class="od-wind"><div class="w">' + (d.windDir != null ? dirGlyph(d.windDir, 'var(--ink-2)') : '') + (d.windMph != null ? d.windMph : '\u2014') + '<small>mph</small></div>' +
-        '<span class="od-wd">' + compass(d.windDir) + (d.gustMph != null ? ' \u00b7 gust ' + d.gustMph : '') + '</span>' +
-        (wkind ? '<span class="wchip ' + wkind.k + '">' + wkind.t + '</span>' : '') + '</div></li>';
+      '<div class="od-wind" aria-label="Wind in mph">' +
+        (d.amMph != null || d.pmMph != null
+          ? windLine('AM', d.amDir, d.amMph, side.faces) + windLine('PM', d.pmDir, d.pmMph, side.faces)
+          : windLine('Max', d.windDir, d.windMph, side.faces)) + '</div></li>';
   }).join('');
 }
 
@@ -767,7 +773,7 @@ function renderOutlook(o){
   $('ol-chart').innerHTML = outlookChart(side);
   $('ol-days').innerHTML = outlookRows(side);
   const g = validDate(o.generated);
-  $('ol-src').textContent = 'Computer model forecast from Open-Meteo' + (g ? ', fetched ' + ago(g) : '') + '. Heights are swell out at sea, not breaking surf. Wind is each day\u2019s peak near ' + (side.key === 'hilo' ? 'Hilo' : 'Kona') + '; offshore wind means cleaner surf.';
+  $('ol-src').textContent = 'Computer model forecast from Open-Meteo' + (g ? ', fetched ' + ago(g) : '') + '. Heights are swell out at sea, not breaking surf. Wind is the strongest in the morning (6\u201311 am) and afternoon (noon\u20135 pm) near ' + (side.key === 'hilo' ? 'Hilo' : 'Kona') + ', in mph; offshore wind means cleaner surf.';
 }
 
 function renderZones(noaa){
