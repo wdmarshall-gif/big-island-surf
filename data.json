@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-14T21:25:45Z",
+ "updatedAt": "2026-10-14T21:30:08Z",
  "noaa": {
   "header": "FZHW52 PHFO 141352",
   "issued": "352 AM HST Wed Oct 14 2026",
@@ -268,19 +268,5 @@
     ]
    }
   ]
- },
- "buoy": {
-  "station": "51206",
-  "name": "Hilo, HI",
-  "t": "2026-10-14T10:56:00-10:00",
-  "wvhtM": 1.6,
-  "swhM": 1.1,
-  "swpS": 14.3,
-  "swd": "NNW",
-  "wwhM": 1.2,
-  "wwpS": 9.1,
-  "wwd": "ENE",
-  "mwdDeg": 334.0,
-  "wtmpC": 27.3
  }
 }
