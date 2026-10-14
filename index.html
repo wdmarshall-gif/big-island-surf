@@ -271,41 +271,68 @@ const ft = m => (m * 3.28084);
 
 /* ---------- swell parsing from the NWS discussion ---------- */
 const TRENDS = [
-  [/\b(build|builds|building|rise|rises|rising|increase|increases|increasing|fill|fills|filling|peak|peaks|peaking)\b/i, 'building'],
-  [/\b(hold|holds|holding|persist|persists|remain|remains|steady|maintain|maintains)\b/i, 'holding'],
+  [/\b(build|builds|building|rise|rises|rising|increase|increases|increasing|fill|fills|filling|peak|peaks|peaking|strengthen|strengthens|strengthening)\b/i, 'building'],
+  [/\b(hold|holds|holding|persist|persists|remain|remains|steady|maintain|maintains|linger|lingers|lingering|keep|keeps)\b/i, 'holding'],
   [/\b(decline|declines|declining|lower|lowers|lowering|fade|fades|fading|diminish|diminishes|subside|subsides|ease|eases|easing|drop|drops|dropping|decrease|decreases|decreasing)\b/i, 'declining']
 ];
-const WHEN = /\b(through|until|by|into|from|late|early)\b(?:\s+(?:this|the|late|early|next))*\s+(\w+day|tonight|weekend)\b/i;
+const DAYW = '(?:today|tonight|weekend|(?:mon|tues|wednes|thurs|fri|satur|sun)day)';
+const MODW = '(?:(?:this|the|late|early|next)\\s+)*';
+const WHEN = new RegExp('\\b(?:(?:through|until|by|into|from|late|early|over)\\s+)?' + MODW + DAYW + '(?:\\s+(?:through|into|and|to)\\s+' + MODW + DAYW + ')?\\b', 'i');
 function firstTrend(s){
   let best = null;
   TRENDS.forEach(([re, name]) => { const m = s.match(re); if (m && (best === null || m.index < best.i)) best = {i:m.index, name}; });
   return best ? best.name : null;
 }
+// Up to two trend steps in order, each with its time phrase: "holding today, then declining tonight through Friday".
+function trendSteps(seg){
+  const hits = [];
+  TRENDS.forEach(([re, name]) => {
+    const g = new RegExp(re.source, 'gi'); let m;
+    while ((m = g.exec(seg))) hits.push({i: m.index, end: m.index + m[0].length, name});
+  });
+  hits.sort((a, b) => a.i - b.i);
+  const steps = [];
+  hits.forEach((h, k) => {
+    if (steps.length >= 2 || (steps.length && steps[steps.length - 1].name === h.name)) return;
+    const stop = k + 1 < hits.length ? hits[k + 1].i : seg.length;
+    const w = seg.slice(h.end, stop).match(WHEN);
+    steps.push({name: h.name, when: w ? lcWhen(w[0]) : ''});
+  });
+  return steps;
+}
+function lcWhen(s){ return s.replace(/^(By|Through|Until|Into|From|Late|Early|Over|This|The|Next|Today|Tonight)\b/, w => w.toLowerCase()); }
 function parseSwells(text){
   const out = [], seen = new Set();
-  const flat = String(text || '').replace(/\s+/g, ' ').trim();
+  const flat = String(text || '').replace(/\s+/g, ' ').replace(/\b(north|south|east|west)-\s+(?=north|south|east|west)/gi, '$1-').trim();
   const sentences = flat.split(/(?<=\.)\s+/);
   const re = /\b(?:(long|medium|short)[- ]period\s+)?((?:north|south|east|west)+(?:[- ](?:north|south|east|west)+)*)\s+swell/gi;
   sentences.forEach(sen => {
-    let m; re.lastIndex = 0;
-    while ((m = re.exec(sen))) {
-      const a = abbr(m[2]);
-      if (!(a in DIRS)) continue;
-      const period = (m[1] || '').toLowerCase();
+    const found = []; let m; re.lastIndex = 0;
+    while ((m = re.exec(sen))) found.push({m, i: m.index, end: m.index + m[0].length});
+    found.forEach((f, k) => {
+      const a = abbr(f.m[2]);
+      if (!(a in DIRS)) return;
+      const period = (f.m[1] || '').toLowerCase();
       const key = a + '|' + period;
-      if (seen.has(key)) continue;
+      if (seen.has(key)) return;
       seen.add(key);
-      let trend = firstTrend(sen.slice(m.index + m[0].length));
-      if (!trend) trend = /\b(another|new|next|fresh|arrive|arrives|arriving)\b/i.test(sen) ? 'incoming' : 'in the water';
-      const w = sen.match(WHEN);
-      out.push({dir:a, deg:DIRS[a], period, trend, when: w ? w[0].replace(/^./, c => c.toLowerCase()) : ''});
-    }
+      const seg = sen.slice(f.end, k + 1 < found.length ? found[k + 1].i : sen.length);
+      const steps = trendSteps(seg);
+      const lead = sen.slice(k > 0 ? found[k - 1].end : 0, f.i);
+      const fresh = /\b(another|new|next|fresh|reinforcing|arrive|arrives|arriving)\b/i.test(lead + ' ' + seg);
+      const trend = steps.length ? steps[0].name : (fresh ? 'incoming' : 'in the water');
+      const leadW = lead.match(WHEN);
+      if (steps.length && leadW && (!steps[0].when || /building|incoming/.test(steps[0].name))) steps[0].when = lcWhen(leadW[0]);
+      let when = steps.length ? steps.map((s, j) => (j ? 'then ' + s.name + ' ' : '') + s.when).join(', ').replace(/\s+,/g, ',').replace(/,\s*$/, '').trim() : '';
+      if (!steps.length) { const w = seg.match(WHEN) || leadW; when = w ? lcWhen(w[0]) : ''; }
+      out.push({dir:a, deg:DIRS[a], period, trend, when});
+    });
   });
   const tw = sentences.find(s => /trade wind/i.test(s));
   if (tw) {
     const after = tw.slice(tw.search(/trade wind/i));
-    const day = after.match(/\b(\w+day|tonight|weekend)\b/i);
-    out.push({dir:'ENE', deg:DIRS.ENE, period:'trade-wind', trend: firstTrend(after) || 'in the water', when: day ? day[0] : '', trade:true});
+    const day = after.match(WHEN);
+    out.push({dir:'ENE', deg:DIRS.ENE, period:'trade-wind', trend: firstTrend(after) || firstTrend(tw) || 'in the water', when: day ? lcWhen(day[0]) : '', trade:true});
   }
   return out;
 }
@@ -428,9 +455,9 @@ function drawMap(rows, slotIdx, swells, buoy){
     const u = unit(sw.deg);
     const w = sw.trade ? 1.6 : sw.period === 'long' ? 3.4 : sw.period === 'medium' ? 2.6 : 2;
     const cls = (sw.trend === 'declining') ? 'sd' : (sw.trend === 'building' || sw.trend === 'incoming') ? 'sb' : 'sa';
-    const r1 = RING - 2, r2 = RING - 34;
+    const r1 = RING - 2, r2 = RING - 25;
     s += arrowAt(CX + u[0] * r1, CY + u[1] * r1, CX + u[0] * r2, CY + u[1] * r2, w, cls);
-    const lr = RING - 18, px = -u[1] * 14, py = u[0] * 14;
+    const lr = RING - 13, px = -u[1] * 14, py = u[0] * 14;
     s += '<text class="al" x="' + f1(CX + u[0] * lr + px) + '" y="' + f1(CY + u[1] * lr + py + 4) + '" text-anchor="middle">' + esc(sw.dir) + '</text>';
   });
   // buoy
