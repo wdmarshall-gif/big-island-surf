@@ -102,8 +102,17 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .surf{display:grid; gap:12px}
 .map{margin:0 auto; width:100%; max-width:600px; background:var(--sheet); border:1px solid var(--rule); border-radius:var(--r); padding:10px 8px 12px; min-width:0}
 .map > svg{display:block; width:100%; height:auto; max-width:100%}
-.showing{display:flex; justify-content:center; align-items:baseline; gap:8px; font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2)}
-.showing b{font-family:var(--f-body); font-size:14px; letter-spacing:0; text-transform:none; color:var(--ink); font-weight:600}
+.stepper{display:grid; grid-template-columns:44px minmax(0,1fr) 44px; align-items:center; gap:6px; padding:0 2px 2px}
+.step{width:44px; height:36px; display:grid; place-items:center; padding:0; border:1px solid var(--rule); border-radius:10px; background:var(--sea); color:var(--ink); cursor:pointer; -webkit-tap-highlight-color:transparent}
+.step svg{width:16px; height:16px}
+.step:disabled{opacity:.3; cursor:default}
+.step-mid{display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0}
+.step-mid b{font-weight:600; font-size:15px; line-height:1.2; white-space:nowrap}
+.dots{display:flex; gap:5px; align-items:center}
+.dots i{width:6px; height:6px; border-radius:3px; background:var(--rule); transition:width .2s ease, background .2s ease}
+.dots i.on{width:18px; background:var(--ink)}
+#map{touch-action:pan-y; user-select:none; -webkit-user-select:none}
+@media (prefers-reduced-motion: reduce){ .dots i{transition:none} }
 .map-key{display:grid; gap:10px; padding:2px 4px 0}
 .arrow-key{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 12px; font-family:var(--f-mono); font-size:11px; color:var(--ink-2); border-top:1px solid var(--rule); padding-top:10px}
 .arrow-key span{display:inline-flex; align-items:center; gap:5px}
@@ -190,7 +199,11 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
 
   <section class="surf" aria-label="Surf map and forecast heights">
     <figure class="map">
-      <div class="showing" id="showing">Surf heights by shore</div>
+      <div class="stepper" role="group" aria-label="Forecast time shown on the map">
+        <button class="step" id="prev" type="button" aria-label="Earlier forecast time"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="step-mid" aria-live="polite"><b id="showing">Surf heights by shore</b><span class="dots" id="dots"></span></div>
+        <button class="step" id="next" type="button" aria-label="Later forecast time"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
       <svg id="map" viewBox="0 0 420 470" role="img" aria-label="Map of Hawaiʻi Island with coastlines colored by forecast surf height and arrows for incoming swells"></svg>
       <figcaption class="map-key">
         <div class="legend" id="legend"></div>
@@ -199,7 +212,7 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
       </figcaption>
     </figure>
     <div class="table-wrap"><table class="fc" id="fc" aria-label="Forecast surf heights in feet by shore and time"></table></div>
-    <p class="hint">Wave-face heights in feet. Tap a time to show it on the map.</p>
+    <p class="hint">Wave-face heights in feet. Tap a time, use the arrows or swipe the map to change what it shows.</p>
   </section>
 
   <section class="lede" aria-labelledby="out-h">
@@ -605,7 +618,10 @@ function renderSlotDependent(){
   const i = state.slot, sl = state.slots[i];
   $('fc').querySelectorAll('.tc').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === i)));
   $('fc').querySelectorAll('td[data-k]').forEach(td => td.classList.toggle('on', +td.dataset.k === i));
-  $('showing').innerHTML = sl ? 'Map shows <b>' + esc(sl.group + ' ' + sl.col) + '</b>' : 'Surf heights by shore';
+  $('showing').textContent = sl ? sl.group + ' ' + sl.col : 'Surf heights by shore';
+  $('dots').innerHTML = state.slots.map((s, k) => '<i' + (k === i ? ' class="on"' : '') + '></i>').join('');
+  $('prev').disabled = i <= 0;
+  $('next').disabled = i >= state.slots.length - 1;
   drawMap(state.rows, i, state.swells, state.data && state.data.buoy);
 }
 
@@ -702,6 +718,23 @@ $('fc').addEventListener('click', e => {
   const b = e.target.closest('.tc, td[data-k]'); if (!b) return;
   state.slot = +b.dataset.k; state.userPicked = true; renderSlotDependent();
 });
+function stepSlot(d){
+  const k = Math.max(0, Math.min(state.slots.length - 1, state.slot + d));
+  if (k === state.slot) return;
+  state.slot = k; state.userPicked = true; renderSlotDependent();
+}
+$('prev').addEventListener('click', () => stepSlot(-1));
+$('next').addEventListener('click', () => stepSlot(1));
+(function swipe(){
+  const m = $('map'); let x0 = null, y0 = null;
+  m.addEventListener('touchstart', e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, {passive: true});
+  m.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    x0 = y0 = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) stepSlot(dx < 0 ? 1 : -1);
+  }, {passive: true});
+})();
 
 /* first frame: island, legend, empty shores */
 drawLegend();
