@@ -3,7 +3,7 @@
 
 Sources:
   - NWS Honolulu Surf Zone Forecast (SRFHFO): discussion + the two Big Island zones only
-  - Open-Meteo marine and weather models: 7-day offshore swell and wind for the Kona and Hilo sides
+  - Open-Meteo marine model: 7-day offshore swell height off each shore
 
 A source that fails keeps its previous block in data.json, so the page never goes blank.
 Standard library only.
@@ -11,7 +11,7 @@ Standard library only.
 Usage:
   python3 scripts/update.py                     # fetch everything, write data.json
   python3 scripts/update.py --srf-file FILE     # parse a saved SRF product instead of fetching it
-  python3 scripts/update.py --no-outlook         # skip the 7-day model fetch
+  python3 scripts/update.py --no-outlook         # skip the 7-day swell fetch
 """
 import datetime as dt
 import json
@@ -222,19 +222,23 @@ def parse_srf(text):
     }
 
 
-# ---------------------------------------------------------------- 7-day outlook (Open-Meteo)
+# ---------------------------------------------------------------- 7-day swell (Open-Meteo)
 
 MARINE_API = "https://marine-api.open-meteo.com/v1/marine"
-WEATHER_API = "https://api.open-meteo.com/v1/forecast"
 M_TO_FT = 3.28084
-# Offshore sea points are tried in order until one has wave data (points too close to land come back empty).
-OUTLOOK_SIDES = [
-    {"key": "kona", "name": "Kona side", "faces": 270,
-     "sea": [(19.60, -156.20), (19.60, -156.35), (19.55, -156.50)],
-     "wind": (19.64, -155.99)},
-    {"key": "hilo", "name": "Hilo side", "faces": 60,
-     "sea": [(19.80, -154.85), (19.85, -154.70), (19.90, -154.55)],
-     "wind": (19.72, -155.08)},
+# One open-water point off each shore, in the same order as the NWS table. Points are tried in
+# order until one has wave data (points the model treats as land come back empty).
+OUTLOOK_SHORES = [
+    {"key": "west", "name": "West", "sub": "Kona · Kohala",
+     "sea": [(19.70, -156.15), (19.70, -156.30), (19.60, -156.20)]},
+    {"key": "south-kona", "name": "South", "sub": "South Kona · Ka Lae",
+     "sea": [(19.05, -156.00), (18.95, -156.10), (18.85, -155.95)]},
+    {"key": "south-kau", "name": "South", "sub": "Kaʻū · Puna",
+     "sea": [(18.95, -155.45), (18.85, -155.45), (18.80, -155.60)]},
+    {"key": "north", "name": "North", "sub": "Hāmākua · Kohala",
+     "sea": [(20.30, -155.55), (20.40, -155.55), (20.45, -155.70)]},
+    {"key": "east", "name": "East", "sub": "Hilo · Puna",
+     "sea": [(19.80, -154.85), (19.85, -154.70), (19.70, -154.70)]},
 ]
 
 
@@ -242,92 +246,35 @@ def om(url, params):
     return json.loads(get(url + "?" + urllib.parse.urlencode(params), "application/json"))
 
 
-def to_ft(values, unit):
-    k = M_TO_FT if (unit or "m").strip().lower() in ("m", "meters", "metre", "metres") else 1.0
-    return [None if v is None else round(v * k, 1) for v in values]
-
-
-def rnd(values, nd=0):
-    return [None if v is None else (round(v, nd) if nd else int(round(v))) for v in values]
-
-
-def daytime_wind(h):
-    """Per day: strongest morning (6-11 am) and afternoon (noon-5 pm) wind, with its direction."""
-    out = {}
-    for t, spd, wdir, gst in zip(h["time"], h["wind_speed_10m"], h["wind_direction_10m"], h["wind_gusts_10m"]):
-        if spd is None:
-            continue
-        date, hour = t[:10], int(t[11:13])
-        part = "am" if 6 <= hour <= 11 else "pm" if 12 <= hour <= 17 else None
-        if not part:
-            continue
-        day = out.setdefault(date, {})
-        if day.get(part + "Mph") is None or spd > day[part + "Mph"]:
-            day[part + "Mph"], day[part + "Dir"] = spd, wdir
-        if gst is not None and gst > day.get("gustMph", -1):
-            day["gustMph"] = gst
-    for day in out.values():
-        for k in list(day):
-            if day[k] is not None:
-                day[k] = int(round(day[k]))
-        day["windMph"] = max(day.get("amMph", 0), day.get("pmMph", 0))
-    return out
-
-
-def fetch_side(sd):
-    marine = None
-    for lat, lon in sd["sea"]:
+def fetch_shore(sh):
+    for lat, lon in sh["sea"]:
         m = om(MARINE_API, {
-            "latitude": lat, "longitude": lon,
-            "hourly": "swell_wave_height,wind_wave_height",
-            "daily": ",".join([
-                "swell_wave_height_max", "swell_wave_direction_dominant", "swell_wave_period_max",
-                "wind_wave_height_max", "wave_height_max"]),
+            "latitude": lat, "longitude": lon, "hourly": "swell_wave_height",
             "timezone": "Pacific/Honolulu", "forecast_days": 7,
         })
-        if any(v is not None for v in m.get("daily", {}).get("swell_wave_height_max") or []):
-            marine, at = m, (lat, lon)
+        h = m.get("hourly", {})
+        if any(v is not None for v in h.get("swell_wave_height") or []):
             break
-    if marine is None:
-        raise ValueError("no wave data near %s" % sd["name"])
-    wind = om(WEATHER_API, {
-        "latitude": sd["wind"][0], "longitude": sd["wind"][1],
-        "hourly": "wind_speed_10m,wind_direction_10m,wind_gusts_10m",
-        "wind_speed_unit": "mph", "timezone": "Pacific/Honolulu", "forecast_days": 7,
-    })
-    d, du = marine["daily"], marine.get("daily_units", {})
-    h, hu = marine["hourly"], marine.get("hourly_units", {})
-    wind_by_day = daytime_wind(wind["hourly"])
-    swell = to_ft(d["swell_wave_height_max"], du.get("swell_wave_height_max"))
-    wwave = to_ft(d["wind_wave_height_max"], du.get("wind_wave_height_max"))
-    seas = to_ft(d["wave_height_max"], du.get("wave_height_max"))
-    sdir, sper = rnd(d["swell_wave_direction_dominant"]), rnd(d["swell_wave_period_max"])
-    days = []
-    for i, date in enumerate(d["time"]):
-        day = {
-            "date": date,
-            "swellFt": swell[i], "swellDir": sdir[i], "swellPer": sper[i],
-            "windWaveFt": wwave[i], "seasFt": seas[i],
-        }
-        day.update(wind_by_day.get(date, {}))
-        days.append(day)
+    else:
+        raise ValueError("no wave data off %s shores (%s)" % (sh["name"], sh["sub"]))
+    unit = (m.get("hourly_units", {}).get("swell_wave_height") or "m").strip().lower()
+    k = M_TO_FT if unit in ("m", "meters", "metre", "metres") else 1.0
+    days = {}
+    for t, v in zip(h["time"], h["swell_wave_height"]):
+        if v is None or not 6 <= int(t[11:13]) <= 18:   # daylight hours only
+            continue
+        days.setdefault(t[:10], []).append(v * k)
     return {
-        "key": sd["key"], "name": sd["name"], "faces": sd["faces"],
-        "sea": {"lat": at[0], "lon": at[1]}, "windAt": {"lat": sd["wind"][0], "lon": sd["wind"][1]},
-        "days": days,
-        "hourly": {
-            "start": h["time"][0], "stepHours": 1,
-            "swellFt": to_ft(h["swell_wave_height"], hu.get("swell_wave_height")),
-            "windWaveFt": to_ft(h["wind_wave_height"], hu.get("wind_wave_height")),
-        },
+        "key": sh["key"], "name": sh["name"], "sub": sh["sub"], "lat": lat, "lon": lon,
+        "days": [{"date": d, "lo": round(min(v), 1), "hi": round(max(v), 1)} for d, v in sorted(days.items())],
     }
 
 
 def fetch_outlook():
     return {
-        "source": "Open-Meteo marine and weather models",
+        "source": "Open-Meteo marine model, swell wave height",
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "sides": [fetch_side(sd) for sd in OUTLOOK_SIDES],
+        "shores": [fetch_shore(sh) for sh in OUTLOOK_SHORES],
     }
 
 
@@ -356,7 +303,7 @@ def main(argv):
             data["outlook"] = fetch_outlook()
             ok.append("outlook")
         except Exception as e:  # noqa: BLE001
-            log("7-day outlook failed: %s" % e)
+            log("7-day swell failed: %s" % e)
 
     if not ok:
         log("every source failed; data.json left unchanged")
@@ -367,10 +314,8 @@ def main(argv):
         f.write("\n")
     noaa = data.get("noaa", {})
     log("wrote %s: sources ok=%s, NWS issued %s" % (OUT, ",".join(ok), noaa.get("issued")))
-    for sd in data.get("outlook", {}).get("sides", []):
-        log("  %s: %s" % (sd["name"], ", ".join("%s %sft/%ss/%s am %s@%s pm %s@%s" % (
-            x["date"][5:], x["swellFt"], x["swellPer"], x["swellDir"],
-            x.get("amMph"), x.get("amDir"), x.get("pmMph"), x.get("pmDir")) for x in sd["days"])))
+    for sh in data.get("outlook", {}).get("shores", []):
+        log("  %-5s %-20s %s" % (sh["name"], sh["sub"], "  ".join("%s %s-%s" % (x["date"][5:], x["lo"], x["hi"]) for x in sh["days"])))
     return 0
 
 
