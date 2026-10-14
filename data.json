@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-14T21:23:02Z",
+ "updatedAt": "2026-10-14T21:25:45Z",
  "noaa": {
   "header": "FZHW52 PHFO 141352",
   "issued": "352 AM HST Wed Oct 14 2026",
@@ -282,12 +282,5 @@
   "wwd": "ENE",
   "mwdDeg": 334.0,
   "wtmpC": 27.3
- },
- "bin": {
-  "title": "Hawaii County Surf Forecast for October 14, 2026",
-  "url": "https://bigislandnow.com/surf/",
-  "paragraphs": [
-   "The current long period northwest swell will hold through Wednesday, and then decline Thursday and Friday. By late Friday, a medium period north-northwest swell will build, bringing surf to near seasonal averages through the weekend. The current long period south-southwest swell will slowly decline through Wednesday. Another long period south swell will help produce surf near seasonal average Thursday into early this weekend. Surf along east facing shores will remain small through Thursday, and then increase and become choppy as trade winds increase Friday and into the weekend."
-  ]
  }
 }
