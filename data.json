@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-14T22:36:27Z",
+ "updatedAt": "2026-10-14T22:38:12Z",
  "noaa": {
   "header": "FZHW52 PHFO 141352",
   "issued": "352 AM HST Wed Oct 14 2026",
@@ -271,7 +271,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine and weather models",
-  "generated": "2026-10-14T22:36:24Z",
+  "generated": "2026-10-14T22:38:11Z",
   "sides": [
    {
     "key": "kona",
@@ -293,9 +293,12 @@
       "swellPer": 11,
       "windWaveFt": 0.0,
       "seasFt": 4.3,
-      "windMph": 6,
+      "amMph": 6,
+      "amDir": 234,
       "gustMph": 19,
-      "windDir": 273
+      "pmMph": 6,
+      "pmDir": 248,
+      "windMph": 6
      },
      {
       "date": "2026-10-15",
@@ -304,9 +307,12 @@
       "swellPer": 15,
       "windWaveFt": 0.1,
       "seasFt": 4.3,
-      "windMph": 6,
+      "amMph": 5,
+      "amDir": 225,
       "gustMph": 20,
-      "windDir": 240
+      "pmMph": 6,
+      "pmDir": 226,
+      "windMph": 6
      },
      {
       "date": "2026-10-16",
@@ -315,9 +321,12 @@
       "swellPer": 12,
       "windWaveFt": 0.0,
       "seasFt": 4.4,
-      "windMph": 7,
+      "amMph": 6,
+      "amDir": 229,
       "gustMph": 20,
-      "windDir": 221
+      "pmMph": 7,
+      "pmDir": 227,
+      "windMph": 7
      },
      {
       "date": "2026-10-17",
@@ -326,9 +335,12 @@
       "swellPer": 11,
       "windWaveFt": 0.0,
       "seasFt": 4.7,
-      "windMph": 7,
+      "amMph": 7,
+      "amDir": 252,
       "gustMph": 19,
-      "windDir": 252
+      "pmMph": 7,
+      "pmDir": 266,
+      "windMph": 7
      },
      {
       "date": "2026-10-18",
@@ -337,9 +349,12 @@
       "swellPer": 9,
       "windWaveFt": 0.1,
       "seasFt": 4.2,
-      "windMph": 6,
+      "amMph": 6,
+      "amDir": 240,
       "gustMph": 19,
-      "windDir": 221
+      "pmMph": 6,
+      "pmDir": 242,
+      "windMph": 6
      },
      {
       "date": "2026-10-19",
@@ -348,9 +363,12 @@
       "swellPer": 9,
       "windWaveFt": 0.3,
       "seasFt": 3.7,
-      "windMph": 6,
+      "amMph": 5,
+      "amDir": 239,
       "gustMph": 18,
-      "windDir": 221
+      "pmMph": 6,
+      "pmDir": 231,
+      "windMph": 6
      },
      {
       "date": "2026-10-20",
@@ -359,9 +377,12 @@
       "swellPer": 11,
       "windWaveFt": 0.1,
       "seasFt": 3.5,
-      "windMph": 6,
+      "amMph": 4,
+      "amDir": 260,
       "gustMph": 21,
-      "windDir": 271
+      "pmMph": 6,
+      "pmDir": 246,
+      "windMph": 6
      }
     ],
     "hourly": {
@@ -729,9 +750,12 @@
       "swellPer": 11,
       "windWaveFt": 0.4,
       "seasFt": 5.5,
-      "windMph": 6,
+      "amMph": 5,
+      "amDir": 269,
       "gustMph": 15,
-      "windDir": 335
+      "pmMph": 5,
+      "pmDir": 52,
+      "windMph": 5
      },
      {
       "date": "2026-10-15",
@@ -740,9 +764,12 @@
       "swellPer": 11,
       "windWaveFt": 0.7,
       "seasFt": 5.4,
-      "windMph": 6,
+      "amMph": 4,
+      "amDir": 83,
       "gustMph": 16,
-      "windDir": 3
+      "pmMph": 6,
+      "pmDir": 64,
+      "windMph": 6
      },
      {
       "date": "2026-10-16",
@@ -751,9 +778,12 @@
       "swellPer": 11,
       "windWaveFt": 1.7,
       "seasFt": 7.7,
-      "windMph": 9,
-      "gustMph": 20,
-      "windDir": 313
+      "amMph": 6,
+      "amDir": 73,
+      "gustMph": 17,
+      "pmMph": 5,
+      "pmDir": 82,
+      "windMph": 6
      },
      {
       "date": "2026-10-17",
@@ -762,9 +792,12 @@
       "swellPer": 6,
       "windWaveFt": 1.9,
       "seasFt": 7.7,
-      "windMph": 8,
+      "amMph": 7,
+      "amDir": 11,
       "gustMph": 18,
-      "windDir": 335
+      "pmMph": 8,
+      "pmDir": 21,
+      "windMph": 8
      },
      {
       "date": "2026-10-18",
@@ -773,9 +806,12 @@
       "swellPer": 6,
       "windWaveFt": 1.6,
       "seasFt": 6.8,
-      "windMph": 9,
+      "amMph": 6,
+      "amDir": 285,
       "gustMph": 21,
-      "windDir": 324
+      "pmMph": 9,
+      "pmDir": 28,
+      "windMph": 9
      },
      {
       "date": "2026-10-19",
@@ -784,9 +820,12 @@
       "swellPer": 6,
       "windWaveFt": 0.4,
       "seasFt": 7.0,
-      "windMph": 8,
+      "amMph": 5,
+      "amDir": 344,
       "gustMph": 17,
-      "windDir": 304
+      "pmMph": 4,
+      "pmDir": 18,
+      "windMph": 5
      },
      {
       "date": "2026-10-20",
@@ -795,9 +834,12 @@
       "swellPer": 6,
       "windWaveFt": 1.4,
       "seasFt": 7.5,
-      "windMph": 8,
+      "amMph": 5,
+      "amDir": 305,
       "gustMph": 19,
-      "windDir": 341
+      "pmMph": 8,
+      "pmDir": 53,
+      "windMph": 8
      }
     ],
     "hourly": {
