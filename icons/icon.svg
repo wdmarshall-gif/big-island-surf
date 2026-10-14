@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE45C"/>
+      <stop offset="0.45" stop-color="#FF8A3D"/>
+      <stop offset="1" stop-color="#FF3D7F"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#14C8D8"/>
+      <stop offset="0.55" stop-color="#0790AE"/>
+      <stop offset="1" stop-color="#05506F"/>
+    </linearGradient>
+    <radialGradient id="barrel" cx="0.5" cy="0.55" r="0.6">
+      <stop offset="0" stop-color="#C9F7FB"/>
+      <stop offset="1" stop-color="#5ED6E6"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#sky)"/>
+
+  <!-- sun -->
+  <circle cx="770" cy="250" r="150" fill="#FFF6C2" opacity="0.9"/>
+
+  <g transform="translate(512 600) scale(1.08) translate(-512 -600)">
+  <!-- wave body: back slope up to the crest, around the curl, then the face down to the right -->
+  <path fill="url(#sea)" d="
+    M -20 1044 L -20 860
+    C 150 830 238 640 268 470
+    C 300 290 430 186 580 186
+    C 748 186 862 306 862 462
+    C 862 600 772 690 650 700
+    C 770 724 890 800 1044 846
+    L 1044 1044 Z"/>
+
+  <!-- barrel (hollow inside the curl) -->
+  <path fill="url(#barrel)" d="
+    M 458 520
+    C 458 430 520 368 600 368
+    C 690 368 752 432 752 512
+    C 752 590 700 640 640 652
+    C 560 668 458 620 458 520 Z"/>
+
+  <!-- foam lip spiralling into the barrel -->
+  <path fill="none" stroke="#FFFFFF" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" d="
+    M 300 420
+    C 340 280 450 222 580 222
+    C 728 222 826 330 826 462
+    C 826 580 742 656 636 656
+    C 540 656 478 594 478 516
+    C 478 452 528 404 590 404
+    C 642 404 680 442 680 492
+    C 680 532 652 560 616 560"/>
+  </g>
+
+  <!-- swell lines -->
+  <path fill="none" stroke="#7FE6F0" stroke-width="44" stroke-linecap="round" opacity="0.9" d="M 90 900 C 260 860 380 860 520 880 C 660 900 780 900 940 868"/>
+  <path fill="none" stroke="#7FE6F0" stroke-width="34" stroke-linecap="round" opacity="0.6" d="M 180 980 C 330 952 450 952 580 968 C 700 982 800 982 920 960"/>
+</svg>

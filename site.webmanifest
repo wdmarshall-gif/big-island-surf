@@ -1,0 +1,15 @@
+{
+  "name": "Big Island Surf",
+  "short_name": "BI Surf",
+  "description": "Big Island surf heights by shore, swell outlook, tides and Hilo buoy.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#E8EFF1",
+  "theme_color": "#0D2531",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
