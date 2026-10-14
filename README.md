@@ -1,6 +1,6 @@
 # Big Island Surf
 
-A one-page surf forecast for Hawaiʻi Island only: a map with each coastline colored by forecast surf height, a shore-by-shore table (west and south shores first), a 7-day swell table, the NWS swell outlook, and Kona-side and Hilo-side weather, wind and tides.
+A one-page surf forecast for Hawaiʻi Island only: a map with each coastline colored by forecast surf height, a shore-by-shore table (west and south shores first), an extended swell table for the five days after the NWS forecast, the NWS swell outlook, and Kona-side and Hilo-side weather, wind and tides.
 
 **Live page:** https://wdmarshall-gif.github.io/big-island-surf/
 

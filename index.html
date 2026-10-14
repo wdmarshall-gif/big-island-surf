@@ -138,13 +138,12 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .outlook .sec-h{margin-bottom:0}
 .fc7{border-spacing:3px}
 .fc7 thead .dh{vertical-align:bottom; padding-bottom:4px}
-.fc7 thead .dh b{display:block; font-family:var(--f-mono); font-weight:500; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.fc7 thead .dh b{display:block; font-family:var(--f-mono); font-weight:500; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink)}
 .fc7 thead .dh span{display:block; font-family:var(--f-mono); font-size:10px; color:var(--ink-3)}
-.fc7 thead .dh.today b{color:var(--ink)}
 .fc7 tbody th{min-width:0; width:76px; padding-right:4px}
 .fc7 tbody th b{font-size:14px}
 .fc7 tbody th span{font-size:11px}
-.fc7 td{font-size:1.04rem; padding:10px 0; min-width:0}
+.fc7 td{font-size:1.2rem; padding:11px 0; min-width:0}
 
 /* Zones */
 .zones{display:grid; gap:16px}
@@ -209,8 +208,8 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
   </section>
 
   <section class="outlook" id="outlook" aria-labelledby="ol-h" hidden>
-    <div class="sec-h"><h2 id="ol-h">7-day swell</h2></div>
-    <div class="table-wrap"><table class="fc fc7" id="ol-table" aria-label="Seven-day swell height in feet by shore"></table></div>
+    <div class="sec-h"><h2 id="ol-h">Extended swell</h2></div>
+    <div class="table-wrap"><table class="fc fc7" id="ol-table" aria-label="Swell height in feet by shore for the five days after the NWS forecast"></table></div>
     <p class="hint" id="ol-src">Offshore swell in feet from computer models (Open-Meteo). Breaking surf usually runs bigger.</p>
   </section>
 
@@ -635,10 +634,14 @@ function renderOutlook(o){
   const sec = $('outlook'), shores = o && o.shores;
   if (!shores || !shores.length) { sec.hidden = true; return; }
   sec.hidden = false;
-  const dates = shores[0].days.map(d => d.date);
-  let h = '<thead><tr><th class="sh" scope="col">Shore</th>' + dates.map((ds, i) => {
+  // Only the days after the NWS forecast window, five of them.
+  const ymd = new Intl.DateTimeFormat('en-CA', {timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit'});
+  const nwsLast = state.slots.length ? state.slots.map(sl => ymd.format(sl.t)).sort().pop() : ymd.format(new Date());
+  const dates = shores[0].days.map(d => d.date).filter(ds => ds > nwsLast).slice(0, 5);
+  if (!dates.length) { sec.hidden = true; return; }
+  let h = '<thead><tr><th class="sh" scope="col">Shore</th>' + dates.map(ds => {
     const dt = dayDate(ds);
-    return '<th scope="col" class="dh' + (i === 0 ? ' today' : '') + '"' + (i === 0 ? ' aria-label="Today"' : '') + '><b>' + fmt(dt, {weekday: 'short'}) + '</b><span>' + fmt(dt, {day: 'numeric'}) + '</span></th>';
+    return '<th scope="col" class="dh"><b>' + fmt(dt, {weekday: 'short'}) + '</b><span>' + fmt(dt, {day: 'numeric'}) + '</span></th>';
   }).join('') + '</tr></thead><tbody>';
   shores.forEach(sh => {
     h += '<tr><th scope="row"><b>' + esc(sh.name) + '</b><span>' + esc(sh.sub) + '</span></th>';
