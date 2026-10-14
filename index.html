@@ -102,17 +102,15 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .surf{display:grid; gap:12px}
 .map{margin:0 auto; width:100%; max-width:600px; background:var(--sheet); border:1px solid var(--rule); border-radius:var(--r); padding:10px 8px 12px; min-width:0}
 .map > svg{display:block; width:100%; height:auto; max-width:100%}
-.stepper{display:grid; grid-template-columns:44px minmax(0,1fr) 44px; align-items:center; gap:6px; padding:0 2px 2px}
-.step{width:44px; height:36px; display:grid; place-items:center; padding:0; border:1px solid var(--rule); border-radius:10px; background:var(--sea); color:var(--ink); cursor:pointer; -webkit-tap-highlight-color:transparent}
-.step svg{width:16px; height:16px}
-.step:disabled{opacity:.3; cursor:default}
-.step-mid{display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0}
-.step-mid b{font-weight:600; font-size:15px; line-height:1.2; white-space:nowrap}
-.dots{display:flex; gap:5px; align-items:center}
-.dots i{width:6px; height:6px; border-radius:3px; background:var(--rule); transition:width .2s ease, background .2s ease}
-.dots i.on{width:18px; background:var(--ink)}
+.timebar{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:10px; padding:2px 2px 8px}
+.tday{display:grid; gap:6px; min-width:0}
+.tday-l{font-family:var(--f-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tsegs{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:3px; padding:3px; border-radius:12px; background:var(--sea); border:1px solid var(--rule)}
+.tseg{height:40px; padding:0; border:0; border-radius:9px; background:transparent; color:var(--ink-2); font:600 15px var(--f-body); letter-spacing:.03em; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:background-color .18s ease, color .18s ease}
+.tseg[aria-selected="true"]{background:var(--ink); color:var(--sea); box-shadow:0 1px 3px rgb(0 0 0 / .2)}
+@media (hover:hover){ .tseg:not([aria-selected="true"]):hover{background:var(--rule); color:var(--ink)} }
 #map{touch-action:pan-y; user-select:none; -webkit-user-select:none}
-@media (prefers-reduced-motion: reduce){ .dots i{transition:none} }
+@media (prefers-reduced-motion: reduce){ .tseg{transition:none} }
 .map-key{display:grid; gap:10px; padding:2px 4px 0}
 .arrow-key{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 12px; font-family:var(--f-mono); font-size:11px; color:var(--ink-2); border-top:1px solid var(--rule); padding-top:10px}
 .arrow-key span{display:inline-flex; align-items:center; gap:5px}
@@ -185,11 +183,7 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
 
   <section class="surf" aria-label="Surf map and forecast heights">
     <figure class="map">
-      <div class="stepper" role="group" aria-label="Forecast time shown on the map">
-        <button class="step" id="prev" type="button" aria-label="Earlier forecast time"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="step-mid" aria-live="polite"><b id="showing">Surf heights by shore</b><span class="dots" id="dots"></span></div>
-        <button class="step" id="next" type="button" aria-label="Later forecast time"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      </div>
+      <div class="timebar" id="timebar" role="tablist" aria-label="Forecast time shown on the map"></div>
       <svg id="map" viewBox="0 0 420 470" role="img" aria-label="Map of Hawaiʻi Island with coastlines colored by forecast surf height and arrows for incoming swells"></svg>
       <figcaption class="map-key">
         <div class="legend" id="legend"></div>
@@ -198,7 +192,7 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
       </figcaption>
     </figure>
     <div class="table-wrap"><table class="fc" id="fc" aria-label="Forecast surf heights in feet by shore and time"></table></div>
-    <p class="hint">Wave-face heights in feet. Tap a time, use the arrows or swipe the map to change what it shows.</p>
+    <p class="hint">Wave-face heights in feet. Pick a time above the map or in this table, or swipe the map.</p>
   </section>
 
   <section class="lede" aria-labelledby="out-h">
@@ -567,14 +561,27 @@ function renderTable(){
   $('fc').innerHTML = h + '</tbody>';
 }
 
+function renderTimebar(){
+  const groups = [];
+  state.slots.forEach((sl, k) => {
+    let g = groups[groups.length - 1];
+    if (!g || g.label !== sl.group) groups.push(g = {label: sl.group, items: []});
+    g.items.push({sl, k});
+  });
+  $('timebar').innerHTML = groups.map(g => '<div class="tday"><span class="tday-l">' + esc(g.label) + '</span><div class="tsegs">' +
+    g.items.map(({sl, k}) => '<button type="button" role="tab" class="tseg" data-k="' + k + '" aria-selected="false" aria-label="' + esc(g.label + ' ' + sl.col) + '">' + esc(sl.col) + '</button>').join('') +
+    '</div></div>').join('');
+}
+
 function renderSlotDependent(){
   const i = state.slot, sl = state.slots[i];
   $('fc').querySelectorAll('.tc').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === i)));
   $('fc').querySelectorAll('td[data-k]').forEach(td => td.classList.toggle('on', +td.dataset.k === i));
-  $('showing').textContent = sl ? sl.group + ' ' + sl.col : 'Surf heights by shore';
-  $('dots').innerHTML = state.slots.map((s, k) => '<i' + (k === i ? ' class="on"' : '') + '></i>').join('');
-  $('prev').disabled = i <= 0;
-  $('next').disabled = i >= state.slots.length - 1;
+  $('timebar').querySelectorAll('.tseg').forEach(b => {
+    const on = +b.dataset.k === i;
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
   drawMap(state.rows, i, state.swells);
 }
 
@@ -597,6 +604,7 @@ function render(){
   state.slots = buildSlots(noaa);
   if (!state.userPicked || state.slot >= state.slots.length) state.slot = defaultSlot(state.slots);
   renderTable();
+  renderTimebar();
   renderSlotDependent();
   renderZones(noaa);
 }
@@ -654,8 +662,15 @@ function stepSlot(d){
   if (k === state.slot) return;
   state.slot = k; state.userPicked = true; renderSlotDependent();
 }
-$('prev').addEventListener('click', () => stepSlot(-1));
-$('next').addEventListener('click', () => stepSlot(1));
+$('timebar').addEventListener('click', e => {
+  const b = e.target.closest('.tseg'); if (!b) return;
+  state.slot = +b.dataset.k; state.userPicked = true; renderSlotDependent();
+});
+$('timebar').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  e.preventDefault(); stepSlot(e.key === 'ArrowRight' ? 1 : -1);
+  const b = $('timebar').querySelector('.tseg[aria-selected="true"]'); if (b) b.focus();
+});
 (function swipe(){
   const m = $('map'); let x0 = null, y0 = null;
   m.addEventListener('touchstart', e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, {passive: true});
