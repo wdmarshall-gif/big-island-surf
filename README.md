@@ -10,7 +10,6 @@ A GitHub Actions workflow (`.github/workflows/update.yml`) runs every 3 hours. I
 
 - pulls the NWS Honolulu Surf Zone Forecast (SRFHFO) and keeps only the discussion and the two Big Island zones,
 - reads the latest swell and water temperature from NOAA buoy 51206 (Hilo),
-- reads the swell summary from [Big Island Now](https://bigislandnow.com/surf/),
 
 then commits the fresh `data.json`. GitHub Pages serves this `gh-pages` branch and redeploys on every commit. If one source is down, its previous data is kept.
 
@@ -22,6 +21,5 @@ GitHub pauses scheduled workflows in public repos after 60 days without activity
 
 - [NWS Honolulu surf forecast](https://www.weather.gov/hfo/SRF)
 - [NOAA NDBC buoy 51206](https://www.ndbc.noaa.gov/station_page.php?station=51206)
-- [Big Island Now surf report](https://bigislandnow.com/surf/)
 
 Surf heights are wave faces, trough to crest, in feet. Conditions vary beach to beach; check [hawaiibeachsafety.com](https://hawaiibeachsafety.com) before going in.

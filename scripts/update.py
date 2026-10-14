@@ -4,7 +4,6 @@
 Sources:
   - NWS Honolulu Surf Zone Forecast (SRFHFO): discussion + the two Big Island zones only
   - NOAA NDBC buoy 51206 (Hilo): latest swell / wind-wave reading and water temperature
-  - Big Island Now surf page: the "Swell Summary" paragraphs
 
 A source that fails keeps its previous block from data.json, so the page never goes blank.
 Standard library only.
@@ -12,23 +11,19 @@ Standard library only.
 Usage:
   python3 scripts/update.py                     # fetch everything, write data.json
   python3 scripts/update.py --srf-file FILE     # parse a saved SRF product instead of fetching it
-  python3 scripts/update.py --offline           # skip network for buoy and Big Island Now
+  python3 scripts/update.py --offline           # skip the network for the buoy
 """
 import datetime as dt
-import html
 import json
 import os
 import re
 import sys
 import urllib.request
-from html.parser import HTMLParser
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "data.json"))
 HST = dt.timezone(dt.timedelta(hours=-10))
 NWS_UA = "big-island-surf (https://github.com/wdmarshall-gif/big-island-surf)"
-WEB_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-          "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 MONTHS = {m: i for i, m in enumerate(
     ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], 1)}
 WEEKDAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
@@ -38,9 +33,9 @@ def log(msg):
     print(msg, file=sys.stderr)
 
 
-def get(url, accept="*/*", browser=False):
+def get(url, accept="*/*"):
     req = urllib.request.Request(url, headers={
-        "User-Agent": WEB_UA if browser else NWS_UA,
+        "User-Agent": NWS_UA,
         "Accept": accept,
     })
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -265,70 +260,6 @@ def fetch_buoy():
     return {k: v for k, v in buoy.items() if v is not None}
 
 
-# ---------------------------------------------------------------- Big Island Now
-
-class Blocks(HTMLParser):
-    """Collects text of headings and paragraphs in document order."""
-    TAGS = {"h1", "h2", "h3", "h4", "h5", "h6", "p"}
-
-    def __init__(self):
-        super().__init__(convert_charrefs=True)
-        self.out, self.tag, self.buf, self.skip = [], None, [], 0
-
-    def handle_starttag(self, tag, attrs):
-        if tag in ("script", "style"):
-            self.skip += 1
-        elif tag in self.TAGS:
-            self.flush()
-            self.tag = tag
-        elif tag == "br" and self.tag:
-            self.buf.append(" ")
-
-    def handle_endtag(self, tag):
-        if tag in ("script", "style"):
-            self.skip = max(0, self.skip - 1)
-        elif tag in self.TAGS and self.tag == tag:
-            self.flush()
-
-    def handle_data(self, data):
-        if self.tag and not self.skip:
-            self.buf.append(data)
-
-    def flush(self):
-        if self.tag:
-            t = squash("".join(self.buf))
-            if t:
-                self.out.append((self.tag, t))
-        self.tag, self.buf = None, []
-
-
-def fetch_bin():
-    page = get("https://bigislandnow.com/surf/", "text/html", browser=True)
-    m = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)', page, re.I)
-    title = html.unescape(m.group(1)).split("|")[0].strip() if m else "Swell summary"
-    p = Blocks()
-    p.feed(page)
-    p.flush()
-    paras, started = [], False
-    for tag, text in p.out:
-        if not started:
-            started = tag.startswith("h") and text.lower().startswith("swell summary")
-            continue
-        if tag.startswith("h") or text.lower().startswith("data courtesy"):
-            break
-        if len(text) > 40:
-            paras.append(text)
-    if not paras:
-        # Fallback: plain text between "Swell Summary" and the regional widgets.
-        plain = html.unescape(re.sub(r"<[^>]+>", "\n", re.sub(r"(?is)<(script|style).*?</\1>", "", page)))
-        mm = re.search(r"Swell Summary\s*(.*?)(?:NORTH EAST|NORTH WEST|Data Courtesy)", plain, re.S)
-        if mm:
-            paras = [squash(x) for x in re.split(r"\n\s*\n", mm.group(1)) if len(squash(x)) > 40]
-    if not paras:
-        raise ValueError("swell summary not found")
-    return {"title": title, "url": "https://bigislandnow.com/surf/", "paragraphs": paras}
-
-
 # ---------------------------------------------------------------- main
 
 def main(argv):
@@ -341,6 +272,7 @@ def main(argv):
         prev = {}
 
     data = dict(prev)
+    data.pop("bin", None)
     ok = []
     try:
         text = open(srf_file, encoding="utf-8").read() if srf_file else fetch_srf_text()
@@ -349,7 +281,7 @@ def main(argv):
     except Exception as e:  # noqa: BLE001
         log("NWS forecast failed: %s" % e)
     if not offline:
-        for key, fn in (("buoy", fetch_buoy), ("bin", fetch_bin)):
+        for key, fn in (("buoy", fetch_buoy),):
             try:
                 data[key] = fn()
                 ok.append(key)

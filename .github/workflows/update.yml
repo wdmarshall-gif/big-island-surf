@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch NWS forecast, Hilo buoy and Big Island Now
+      - name: Fetch NWS forecast and Hilo buoy
         run: python3 scripts/update.py
 
       - name: Publish data.json (GitHub Pages redeploys on push)
