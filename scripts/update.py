@@ -3,19 +3,22 @@
 
 Sources:
   - NWS Honolulu Surf Zone Forecast (SRFHFO): discussion + the two Big Island zones only
+  - Open-Meteo marine and weather models: 7-day offshore swell and wind for the Kona and Hilo sides
 
-If the fetch fails, data.json is left as it was, so the page never goes blank.
+A source that fails keeps its previous block in data.json, so the page never goes blank.
 Standard library only.
 
 Usage:
   python3 scripts/update.py                     # fetch everything, write data.json
   python3 scripts/update.py --srf-file FILE     # parse a saved SRF product instead of fetching it
+  python3 scripts/update.py --no-outlook         # skip the 7-day model fetch
 """
 import datetime as dt
 import json
 import os
 import re
 import sys
+import urllib.parse
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -219,6 +222,96 @@ def parse_srf(text):
     }
 
 
+# ---------------------------------------------------------------- 7-day outlook (Open-Meteo)
+
+MARINE_API = "https://marine-api.open-meteo.com/v1/marine"
+WEATHER_API = "https://api.open-meteo.com/v1/forecast"
+M_TO_FT = 3.28084
+# Offshore sea points are tried in order until one has wave data (points too close to land come back empty).
+OUTLOOK_SIDES = [
+    {"key": "kona", "name": "Kona side", "faces": 270,
+     "sea": [(19.60, -156.20), (19.60, -156.35), (19.55, -156.50)],
+     "wind": (19.64, -155.99)},
+    {"key": "hilo", "name": "Hilo side", "faces": 60,
+     "sea": [(19.80, -154.85), (19.85, -154.70), (19.90, -154.55)],
+     "wind": (19.72, -155.08)},
+]
+
+
+def om(url, params):
+    return json.loads(get(url + "?" + urllib.parse.urlencode(params), "application/json"))
+
+
+def to_ft(values, unit):
+    k = M_TO_FT if (unit or "m").strip().lower() in ("m", "meters", "metre", "metres") else 1.0
+    return [None if v is None else round(v * k, 1) for v in values]
+
+
+def rnd(values, nd=0):
+    return [None if v is None else (round(v, nd) if nd else int(round(v))) for v in values]
+
+
+def fetch_side(sd):
+    marine = None
+    for lat, lon in sd["sea"]:
+        m = om(MARINE_API, {
+            "latitude": lat, "longitude": lon,
+            "hourly": "swell_wave_height,wind_wave_height",
+            "daily": ",".join([
+                "swell_wave_height_max", "swell_wave_direction_dominant", "swell_wave_period_max",
+                "wind_wave_height_max", "wave_height_max"]),
+            "timezone": "Pacific/Honolulu", "forecast_days": 7,
+        })
+        if any(v is not None for v in m.get("daily", {}).get("swell_wave_height_max") or []):
+            marine, at = m, (lat, lon)
+            break
+    if marine is None:
+        raise ValueError("no wave data near %s" % sd["name"])
+    wind = om(WEATHER_API, {
+        "latitude": sd["wind"][0], "longitude": sd["wind"][1],
+        "daily": "wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant",
+        "wind_speed_unit": "mph", "timezone": "Pacific/Honolulu", "forecast_days": 7,
+    })
+    d, du = marine["daily"], marine.get("daily_units", {})
+    h, hu = marine["hourly"], marine.get("hourly_units", {})
+    w = wind["daily"]
+    swell = to_ft(d["swell_wave_height_max"], du.get("swell_wave_height_max"))
+    wwave = to_ft(d["wind_wave_height_max"], du.get("wind_wave_height_max"))
+    seas = to_ft(d["wave_height_max"], du.get("wave_height_max"))
+    sdir, sper = rnd(d["swell_wave_direction_dominant"]), rnd(d["swell_wave_period_max"])
+    wspd, wgst, wdir = rnd(w["wind_speed_10m_max"]), rnd(w["wind_gusts_10m_max"]), rnd(w["wind_direction_10m_dominant"])
+    wdates = w["time"]
+    days = []
+    for i, date in enumerate(d["time"]):
+        j = wdates.index(date) if date in wdates else None
+        days.append({
+            "date": date,
+            "swellFt": swell[i], "swellDir": sdir[i], "swellPer": sper[i],
+            "windWaveFt": wwave[i], "seasFt": seas[i],
+            "windMph": wspd[j] if j is not None else None,
+            "gustMph": wgst[j] if j is not None else None,
+            "windDir": wdir[j] if j is not None else None,
+        })
+    return {
+        "key": sd["key"], "name": sd["name"], "faces": sd["faces"],
+        "sea": {"lat": at[0], "lon": at[1]}, "windAt": {"lat": sd["wind"][0], "lon": sd["wind"][1]},
+        "days": days,
+        "hourly": {
+            "start": h["time"][0], "stepHours": 1,
+            "swellFt": to_ft(h["swell_wave_height"], hu.get("swell_wave_height")),
+            "windWaveFt": to_ft(h["wind_wave_height"], hu.get("wind_wave_height")),
+        },
+    }
+
+
+def fetch_outlook():
+    return {
+        "source": "Open-Meteo marine and weather models",
+        "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "sides": [fetch_side(sd) for sd in OUTLOOK_SIDES],
+    }
+
+
 # ---------------------------------------------------------------- main
 
 def main(argv):
@@ -239,6 +332,12 @@ def main(argv):
         ok.append("noaa")
     except Exception as e:  # noqa: BLE001
         log("NWS forecast failed: %s" % e)
+    if "--no-outlook" not in argv:
+        try:
+            data["outlook"] = fetch_outlook()
+            ok.append("outlook")
+        except Exception as e:  # noqa: BLE001
+            log("7-day outlook failed: %s" % e)
 
     if not ok:
         log("every source failed; data.json left unchanged")
@@ -248,7 +347,10 @@ def main(argv):
         json.dump(data, f, ensure_ascii=False, indent=1)
         f.write("\n")
     noaa = data.get("noaa", {})
-    log("wrote %s: NWS issued %s" % (OUT, noaa.get("issued")))
+    log("wrote %s: sources ok=%s, NWS issued %s" % (OUT, ",".join(ok), noaa.get("issued")))
+    for sd in data.get("outlook", {}).get("sides", []):
+        log("  %s: %s" % (sd["name"], ", ".join("%s %sft/%ss/%s wind %s" % (
+            x["date"][5:], x["swellFt"], x["swellPer"], x["swellDir"], x["windMph"]) for x in sd["days"])))
     return 0
 
 

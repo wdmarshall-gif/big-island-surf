@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch the NWS surf forecast
+      - name: Fetch the NWS surf forecast and 7-day outlook
         run: python3 scripts/update.py
 
       - name: Publish data.json (GitHub Pages redeploys on push)
