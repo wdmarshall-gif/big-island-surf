@@ -227,7 +227,7 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
 
   <footer>
     <p>Surf heights are wave faces, trough to crest, in feet. They vary beach to beach, and sets bigger than the range show up every so often. Expect rip currents near any surf. Beach hazards: <a href="https://hawaiibeachsafety.com" target="_blank" rel="noopener">hawaiibeachsafety.com</a>.</p>
-    <p id="sched">Refreshes automatically about every 3 hours. NWS Honolulu issues a new surf forecast each morning and afternoon.</p>
+    <p id="sched">Refreshes automatically twice a day, shortly after NWS Honolulu issues its morning and afternoon surf forecasts.</p>
     <div class="links">
       <a href="https://www.weather.gov/hfo/SRF" target="_blank" rel="noopener">NWS surf forecast</a>
       <a href="https://github.com/wdmarshall-gif/big-island-surf" target="_blank" rel="noopener">Source on GitHub</a>
@@ -241,7 +241,7 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
 
 /* ---------- constants ---------- */
 const TZ = 'Pacific/Honolulu';
-const REFRESH_UTC_HOURS = [2,5,8,11,14,17,20,23], REFRESH_MIN = 47;
+const REFRESH_UTC_HOURS = [2,14], REFRESH_MIN = 47;
 const DIRS = {N:0,NNE:22.5,NE:45,ENE:67.5,E:90,ESE:112.5,SE:135,SSE:157.5,S:180,SSW:202.5,SW:225,WSW:247.5,W:270,WNW:292.5,NW:315,NNW:337.5};
 const LEVEL_WORD = ['', 'small', 'fun size', 'solid', 'big', 'huge'];
 const SHORES = {
@@ -693,10 +693,10 @@ function updateFresh(){
   const u = d && validDate(d.updatedAt);
   if (!u) return;
   const age = Date.now() - u.getTime();
-  el.className = 'pill ' + (age < 8 * 36e5 ? 'ok' : 'warn');
+  el.className = 'pill ' + (age < 14 * 36e5 ? 'ok' : 'warn');
   el.textContent = 'Updated ' + ago(u);
   const nx = nextRefresh();
-  if (nx) $('sched').textContent = 'Refreshes automatically about every 3 hours. NWS Honolulu issues a new surf forecast each morning and afternoon. Next refresh around ' + hm(nx) + ' HST.';
+  if (nx) $('sched').textContent = 'Refreshes automatically twice a day, shortly after NWS Honolulu issues its morning and afternoon surf forecasts. Next refresh around ' + hm(nx) + ' HST.';
 }
 
 function showState(title, detail){

@@ -2,8 +2,8 @@ name: Update surf data
 
 on:
   schedule:
-    # Every 3 hours. 02:47 and 14:47 UTC land after the NWS Honolulu afternoon and morning issuances.
-    - cron: "47 2,5,8,11,14,17,20,23 * * *"
+    # Twice a day: 02:47 and 14:47 UTC (4:47 PM and 4:47 AM HST), after the NWS Honolulu afternoon and morning issuances.
+    - cron: "47 2,14 * * *"
   workflow_dispatch:
   push:
     branches: [gh-pages]
