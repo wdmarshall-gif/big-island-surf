@@ -1,20 +1,20 @@
 {
- "updatedAt": "2026-10-15T00:31:18Z",
+ "updatedAt": "2026-10-15T07:44:53Z",
  "noaa": {
-  "header": "FZHW52 PHFO 142314",
-  "issued": "114 PM HST Wed Oct 14 2026",
-  "issuedISO": "2026-10-14T13:14:00-10:00",
-  "discussion": "The current medium period northwest swell will linger today, holding surf near seasonal average for north and west facing shores, before declining tonight through Friday. By late Friday, a medium period north-northwest swell will build and once again help bring surf back to near seasonal averages through the weekend. The current medium period south swell will keep surf along south facing shores near seasonal average today. A reinforcing long period south swell is expected to produce an increase in surf Thursday into Saturday. Surf along east facing shores will remain small through Thursday as small wind waves and tiny east swell persist. Choppy surf will increase as trade winds strengthen across the region Friday into the weekend.",
+  "header": "FZHW52 PHFO 150135",
+  "issued": "335 PM HST Wed Oct 14 2026",
+  "issuedISO": "2026-10-14T15:35:00-10:00",
+  "discussion": "The current small northwest swell will continue a gradual decline through Thursday, followed by a moderate north-northwest swell Friday through the weekend. Surf along north and west facing shores should top out around seasonal average during the peak of the swell Friday afternoon and Saturday, then slowly decline late Saturday and Sunday as the dropping swell shifts more northerly and a smaller overlapping northwest swell arrives. Both swells will fade early next week. Surf along south facing shores will briefly fall near or just below seasonal average as the current south swell continues a slow decline tonight. A new long-periond south swell will build Thursday and may push south shore surf back above seasonal average through Friday. The swell will slowly decline Saturday through early next week. Surf along east facing shores will remain small through Thursday and will steadily increase Friday as trade winds strengthen over the region. Rough trade wind swell will produce east shore surf above seasonal average Saturday through early next week.",
   "zones": [
    {
     "key": "windward",
     "name": "Big Island Windward and Southeast",
     "periods": [
      {
-      "label": "Today",
+      "label": "Tonight",
       "cols": [
-       "AM",
-       "PM"
+       "PM",
+       "AM"
       ]
      },
      {
@@ -47,8 +47,8 @@
      {
       "facing": "South",
       "values": [
-       "5-7",
-       "4-6",
+       "3-5",
+       "3-5",
        "3-5",
        "5-7"
       ]
@@ -56,20 +56,11 @@
     ],
     "days": [
      {
-      "label": "Rest Of Today",
-      "weather": "Mostly sunny. Isolated showers.",
-      "tempLabel": "High",
-      "temp": "In the lower 80s.",
-      "winds": "East winds around 5 mph.",
-      "sunrise": "6:14 AM",
-      "sunset": "5:58 PM"
-     },
-     {
       "label": "Tonight",
-      "weather": "Mostly cloudy. Numerous showers.",
+      "weather": "Mostly sunny until 6 PM, then mostly cloudy. Numerous showers.",
       "tempLabel": "Low",
       "temp": "In the lower 70s.",
-      "winds": "Northeast winds around 5 mph, becoming north after midnight.",
+      "winds": "East winds around 5 mph, becoming north after midnight.",
       "sunrise": null,
       "sunset": null
      },
@@ -121,10 +112,10 @@
     "name": "Big Island Leeward",
     "periods": [
      {
-      "label": "Today",
+      "label": "Tonight",
       "cols": [
-       "AM",
-       "PM"
+       "PM",
+       "AM"
       ]
      },
      {
@@ -148,7 +139,7 @@
      {
       "facing": "South",
       "values": [
-       "4-6",
+       "3-5",
        "3-5",
        "3-5",
        "4-6"
@@ -157,20 +148,11 @@
     ],
     "days": [
      {
-      "label": "Rest Of Today",
-      "weather": "Mostly sunny. Isolated showers.",
-      "tempLabel": "High",
-      "temp": "In the mid 80s.",
-      "winds": "West winds around 5 mph.",
-      "sunrise": "6:18 AM",
-      "sunset": "6:02 PM"
-     },
-     {
       "label": "Tonight",
-      "weather": "Partly cloudy. Isolated showers.",
+      "weather": "Mostly sunny until 6 PM, then mostly cloudy until 12 AM, then partly cloudy. Scattered showers.",
       "tempLabel": "Low",
       "temp": "Around 70.",
-      "winds": "North winds around 5 mph.",
+      "winds": "West winds around 5 mph, becoming north.",
       "sunrise": null,
       "sunset": null
      },
@@ -219,11 +201,6 @@
       "station": "Kawaihae",
       "events": [
        {
-        "type": "Low",
-        "ft": 0.6,
-        "t": "2026-10-14T13:26:00-10:00"
-       },
-       {
         "type": "High",
         "ft": 0.9,
         "t": "2026-10-14T17:40:00-10:00"
@@ -251,7 +228,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine model, swell wave height",
-  "generated": "2026-10-15T00:31:16Z",
+  "generated": "2026-10-15T07:44:51Z",
   "shores": [
    {
     "key": "west",
