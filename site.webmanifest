@@ -1,6 +1,6 @@
 {
   "name": "Big Island Surf",
-  "short_name": "BI Surf",
+  "short_name": "Big Island Surf",
   "description": "Big Island surf heights by shore, swell outlook, tides and Hilo buoy.",
   "start_url": "./",
   "scope": "./",
