@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-15T00:04:51Z",
+ "updatedAt": "2026-10-15T00:15:00Z",
  "noaa": {
   "header": "FZHW52 PHFO 142314",
   "issued": "114 PM HST Wed Oct 14 2026",
@@ -251,7 +251,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine model, swell wave height",
-  "generated": "2026-10-15T00:04:49Z",
+  "generated": "2026-10-15T00:14:58Z",
   "shores": [
    {
     "key": "west",
