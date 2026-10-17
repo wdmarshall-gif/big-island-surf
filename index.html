@@ -542,12 +542,23 @@ function tideChart(st, now, win){
     s += '<line x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + (pt - 10) + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.2"/>';
     s += '<text x="' + f1(x) + '" y="' + (pt - 13) + '" text-anchor="' + (x < 24 ? 'start' : 'middle') + '" fill="var(--ink)" style="font:600 9.5px var(--f-mono);letter-spacing:.1em">NOW</text>';
   }
+  // Labels: highs above their point, lows below. A label that would run into the previous one
+  // on its row slides right, or moves to the other side of its point when there's no room.
+  const lastRight = {above: -1e9, below: -1e9}, CH = 6.1;
   use.filter(e => e.d.getTime() >= t0 && e.d.getTime() <= t1).forEach(e => {
     const x = X(e.d.getTime()), y = Y(+e.ft), hi = /high/i.test(e.type);
-    const anc = x < pl + 30 ? 'start' : x > W - pr - 30 ? 'end' : 'middle';
+    const ft = (+e.ft).toFixed(1) + '′ ', tm = hmShort(e.d), w = (ft.length + tm.length) * CH;
+    const place = row => {
+      let left = Math.min(Math.max(x - w / 2, pl), W - pr - w);
+      if (left < lastRight[row] + 3) left = lastRight[row] + 3;
+      return {row, left, fits: left + w <= W - pr};
+    };
+    let pos = place(hi ? 'above' : 'below');
+    if (!pos.fits) { const alt = place(hi ? 'below' : 'above'); if (alt.fits) pos = alt; else pos.left = W - pr - w; }
+    lastRight[pos.row] = pos.left + w;
+    const ly = pos.row === 'above' ? y - 8 : y + 16;
     s += '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="3" fill="var(--sheet)" stroke="var(--accent)" stroke-width="1.6"/>';
-    const ly = hi ? y - 8 : y + 16;
-    s += '<text x="' + f1(x) + '" y="' + f1(ly) + '" text-anchor="' + anc + '" fill="var(--ink)" style="font:500 10px var(--f-mono)">' + (+e.ft).toFixed(1) + '′ <tspan fill="var(--ink-2)">' + hmShort(e.d) + '</tspan></text>';
+    s += '<text x="' + f1(pos.left) + '" y="' + f1(ly) + '" text-anchor="start" fill="var(--ink)" style="font:500 10px var(--f-mono)">' + ft + '<tspan fill="var(--ink-2)">' + tm + '</tspan></text>';
   });
   return s + '</svg>';
 }
