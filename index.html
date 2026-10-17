@@ -502,43 +502,49 @@ function dirGlyph(deg, color){
   const t = (deg + 180) % 360;
   return '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><g transform="rotate(' + t + ' 9 9)"><line x1="9" y1="15" x2="9" y2="5" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/><polygon points="9,2 4.8,7.4 13.2,7.4" fill="' + color + '"/></g></svg>';
 }
-function tideChart(st, now){
+function tideChart(st, now, win){
   const ev = (st.events || []).map(e => Object.assign({}, e, {d: validDate(e.t)})).filter(e => e.d && isFinite(+e.ft)).sort((a, b) => a.d - b.d);
   if (ev.length < 2) return '';
-  const W = 330, H = 132, pl = 4, pr = 4, pt = 20, pb = 34;
-  const t0 = ev[0].d.getTime(), t1 = ev[ev.length - 1].d.getTime();
-  const hs = ev.map(e => +e.ft), y0 = Math.min(...hs) - 0.3, y1 = Math.max(...hs) + 0.3;
+  const t0 = win ? win[0] : ev[0].d.getTime(), t1 = win ? win[1] : ev[ev.length - 1].d.getTime();
+  // the events that shape the window: everything inside it plus one on each side
+  let iA = ev.findIndex(e => e.d.getTime() >= t0); iA = iA < 0 ? ev.length - 1 : Math.max(0, iA - 1);
+  let iB = ev.findIndex(e => e.d.getTime() > t1); iB = iB < 0 ? ev.length - 1 : iB;
+  const use = ev.slice(iA, iB + 1);
+  if (use.length < 2) return '';
+  const W = 330, H = 136, pl = 4, pr = 4, pt = 22, pb = 34;
+  const hs = use.map(e => +e.ft), y0 = Math.min(...hs) - 0.3, y1 = Math.max(...hs) + 0.35;
   const X = t => pl + (t - t0) / (t1 - t0) * (W - pl - pr);
   const Y = h => pt + (1 - (h - y0) / (y1 - y0)) * (H - pt - pb);
-  let line = '';
-  for (let k = 0; k < ev.length - 1; k++) {
-    const a = ev[k], b = ev[k + 1], ta = a.d.getTime(), tb = b.d.getTime();
-    for (let j = (k === 0 ? 0 : 1); j <= 24; j++) {
-      const f = j / 24, h = +a.ft + (+b.ft - +a.ft) * (1 - Math.cos(Math.PI * f)) / 2;
-      line += (line ? 'L' : 'M') + f1(X(ta + (tb - ta) * f)) + ' ' + f1(Y(h));
-    }
+  const tA = Math.max(t0, use[0].d.getTime()), tB = Math.min(t1, use[use.length - 1].d.getTime());
+  let line = '', k = 0;
+  for (let t = tA; t <= tB + 1; t += 9e5) {
+    while (k < use.length - 2 && use[k + 1].d.getTime() < t) k++;
+    const a = use[k], b = use[k + 1], ta = a.d.getTime(), tb = b.d.getTime();
+    const f = Math.min(1, Math.max(0, (t - ta) / (tb - ta)));
+    line += (line ? 'L' : 'M') + f1(X(t)) + ' ' + f1(Y(+a.ft + (+b.ft - +a.ft) * (1 - Math.cos(Math.PI * f)) / 2));
   }
   const base = H - pb;
   let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Tide curve for ' + esc(st.station) + '">';
   s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + base + '" y2="' + base + '" stroke="var(--rule)"/>';
-  // midnights
-  let m = hst(ev[0].d), mid = hstAt(m, 1, 0);
+  const dayLabel = (x, d) => '<text x="' + f1(x) + '" y="' + (H - 3) + '" fill="var(--ink-3)" style="font:500 9.5px var(--f-mono);letter-spacing:.08em">' + fmt(d, {weekday: 'short'}).toUpperCase() + '</text>';
+  let m = hst(new Date(t0)), mid = hstAt(m, 1, 0);
+  if (X(mid.getTime()) - pl > 40) s += dayLabel(pl + 2, new Date(t0));
   while (mid.getTime() < t1) {
     const x = X(mid.getTime());
     s += '<line x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + (pt - 6) + '" y2="' + base + '" stroke="var(--rule)" stroke-dasharray="2 3"/>';
-    s += '<text x="' + f1(x + 4) + '" y="' + (H - 3) + '" fill="var(--ink-3)" style="font:500 9.5px var(--f-mono);letter-spacing:.08em">' + fmt(mid, {weekday:'short'}).toUpperCase() + '</text>';
+    if (W - pr - x > 30) s += dayLabel(x + 4, mid);
     m = hst(mid); mid = hstAt(m, 1, 0);
   }
-  s += '<path d="' + line + 'L' + f1(X(t1)) + ' ' + base + 'L' + f1(X(t0)) + ' ' + base + 'Z" fill="var(--accent-soft)"/>';
+  s += '<path d="' + line + 'L' + f1(X(tB)) + ' ' + base + 'L' + f1(X(tA)) + ' ' + base + 'Z" fill="var(--accent-soft)"/>';
   s += '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2"/>';
   if (now >= t0 && now <= t1) {
     const x = X(now);
     s += '<line x1="' + f1(x) + '" x2="' + f1(x) + '" y1="' + (pt - 10) + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.2"/>';
-    s += '<text x="' + f1(x) + '" y="' + (pt - 12) + '" text-anchor="middle" fill="var(--ink)" style="font:600 9.5px var(--f-mono);letter-spacing:.1em">NOW</text>';
+    s += '<text x="' + f1(x) + '" y="' + (pt - 13) + '" text-anchor="' + (x < 24 ? 'start' : 'middle') + '" fill="var(--ink)" style="font:600 9.5px var(--f-mono);letter-spacing:.1em">NOW</text>';
   }
-  ev.forEach((e, i) => {
+  use.filter(e => e.d.getTime() >= t0 && e.d.getTime() <= t1).forEach(e => {
     const x = X(e.d.getTime()), y = Y(+e.ft), hi = /high/i.test(e.type);
-    const anc = i === 0 ? 'start' : i === ev.length - 1 ? 'end' : 'middle';
+    const anc = x < pl + 30 ? 'start' : x > W - pr - 30 ? 'end' : 'middle';
     s += '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="3" fill="var(--sheet)" stroke="var(--accent)" stroke-width="1.6"/>';
     const ly = hi ? y - 8 : y + 16;
     s += '<text x="' + f1(x) + '" y="' + f1(ly) + '" text-anchor="' + anc + '" fill="var(--ink)" style="font:500 10px var(--f-mono)">' + (+e.ft).toFixed(1) + '′ <tspan fill="var(--ink-2)">' + hmShort(e.d) + '</tspan></text>';
@@ -626,7 +632,7 @@ function render(){
   renderTable();
   renderTimebar();
   renderSlotDependent();
-  renderZones(noaa);
+  renderZones(noaa, d.tides);
   renderOutlook(d.outlook);
 }
 
@@ -661,22 +667,25 @@ function renderOutlook(o){
   $('ol-src').textContent = 'Offshore swell in feet from computer models (Open-Meteo)' + (g ? ', updated ' + ago(g) : '') + '. Breaking surf usually runs bigger.';
 }
 
-function renderZones(noaa){
+function renderZones(noaa, tides){
   const zones = ((noaa && noaa.zones) || []).slice().sort((a, b) => (zoneKey(a.name) === 'leeward' ? 0 : 1) - (zoneKey(b.name) === 'leeward' ? 0 : 1));
   const now = Date.now();
+  const win = [now - 2 * 36e5, now + 46 * 36e5];   // rolling 48 hours, starting a little before now
+  const byName = (tides && tides.stations) || {};
+  const full = st => byName[st.station] && byName[st.station].events && byName[st.station].events.length ? {station: st.station, events: byName[st.station].events, full: true} : st;
   $('zones').innerHTML = zones.map(z => {
     const zk = zoneKey(z.name);
     const days = z.days || [];
     const sunDay = days.find(x => x.sunrise || x.sunset);
-    const tides = z.tides || [];
-    const main = tides[0], rest = tides.slice(1);
+    const zt = (z.tides || []).map(full);
+    const main = zt[0], rest = zt.slice(1);
     return '<article class="card"><div class="card-h"><h3>' + esc(ZONE_NICK[zk]) + '</h3><p>' + esc(z.name) + '</p></div>' +
       '<div class="periods">' + days.map(p =>
         '<div class="period"><span class="pl">' + esc(p.label) + '</span><span class="wx">' + esc(p.weather) + '</span><dl>' +
         '<div><dt>' + esc(p.tempLabel || 'Temp') + '</dt><dd>' + esc(cleanTemp(p.temp)) + '</dd></div>' +
         '<div><dt>Wind</dt><dd>' + esc(noDot(p.winds)) + '</dd></div></dl></div>').join('') + '</div>' +
-      (main ? '<div class="tide"><h4>Tide · ' + esc(main.station) + '</h4>' + tideChart(main, now) +
-        rest.map(st => '<p class="more">' + esc(st.station) + ': ' + (st.events || []).map(e => { const dt = validDate(e.t); return (/high/i.test(e.type) ? 'H ' : 'L ') + (+e.ft).toFixed(1) + '′ ' + (dt ? hmShort(dt) : ''); }).join(' · ') + '</p>').join('') + '</div>' : '') +
+      (main ? '<div class="tide"><h4>Tide · ' + esc(main.station) + (main.full ? ' · next 48 hours' : '') + '</h4>' + tideChart(main, now, main.full ? win : null) +
+        rest.map(st => '<p class="more">' + esc(st.station) + ': ' + (st.events || []).filter(e => { const dt = validDate(e.t); return !st.full || (dt && dt.getTime() >= now - 36e5); }).slice(0, st.full ? 4 : 99).map(e => { const dt = validDate(e.t); return (/high/i.test(e.type) ? 'H ' : 'L ') + (+e.ft).toFixed(1) + '′ ' + (dt ? hmShort(dt) : ''); }).join(' · ') + '</p>').join('') + '</div>' : '') +
       (sunDay ? '<div class="sun"><span>Sunrise ' + esc(sunDay.sunrise || '—') + '</span><span>Sunset ' + esc(sunDay.sunset || '—') + '</span><span>' + esc(sunDay.label || '') + '</span></div>' : '') +
       '</article>';
   }).join('');

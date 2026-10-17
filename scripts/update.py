@@ -4,6 +4,7 @@
 Sources:
   - NWS Honolulu Surf Zone Forecast (SRFHFO): discussion + the two Big Island zones only
   - Open-Meteo marine model: 7-day offshore swell height off each shore
+  - NOAA CO-OPS tide predictions: high and low tides for Kona, Kawaihae and Hilo
 
 A source that fails keeps its previous block in data.json, so the page never goes blank.
 Standard library only.
@@ -12,6 +13,7 @@ Usage:
   python3 scripts/update.py                     # fetch everything, write data.json
   python3 scripts/update.py --srf-file FILE     # parse a saved SRF product instead of fetching it
   python3 scripts/update.py --no-outlook         # skip the 7-day swell fetch
+  python3 scripts/update.py --no-tides           # skip the NOAA tide fetch
 """
 import datetime as dt
 import json
@@ -278,6 +280,45 @@ def fetch_outlook():
     }
 
 
+# ---------------------------------------------------------------- tides (NOAA CO-OPS)
+
+TIDE_API = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+# Names match the tide stations in the NWS surf forecast, so the page can line them up.
+TIDE_STATIONS = [("Kona", "1617846"), ("Kawaihae", "1617433"), ("Hilo Bay", "1617760")]
+
+
+def fetch_tides():
+    start = dt.datetime.now(HST).date() - dt.timedelta(days=1)   # yesterday onward, so a 2-day view always has data
+    stations, errors = {}, []
+    for name, sid in TIDE_STATIONS:
+        try:
+            j = json.loads(get(TIDE_API + "?" + urllib.parse.urlencode({
+                "product": "predictions", "application": "big-island-surf",
+                "begin_date": start.strftime("%Y%m%d"), "range": 24 * 5,
+                "datum": "MLLW", "station": sid, "time_zone": "lst_ldt",
+                "units": "english", "interval": "hilo", "format": "json",
+            }), "application/json"))
+            preds = j.get("predictions") or []
+            if not preds:
+                raise ValueError(j.get("error", {}).get("message", "no predictions"))
+            stations[name] = {"id": sid, "events": [{
+                "type": "High" if p["type"].upper().startswith("H") else "Low",
+                "ft": round(float(p["v"]), 2),
+                "t": p["t"].replace(" ", "T") + ":00-10:00",
+            } for p in preds]}
+        except Exception as e:  # noqa: BLE001
+            errors.append("%s (%s): %s" % (name, sid, e))
+    for e in errors:
+        log("tide station failed: " + e)
+    if not stations:
+        raise ValueError("no tide stations returned data")
+    return {
+        "source": "NOAA CO-OPS tide predictions, feet above MLLW",
+        "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "stations": stations,
+    }
+
+
 # ---------------------------------------------------------------- main
 
 def main(argv):
@@ -298,6 +339,12 @@ def main(argv):
         ok.append("noaa")
     except Exception as e:  # noqa: BLE001
         log("NWS forecast failed: %s" % e)
+    if "--no-tides" not in argv:
+        try:
+            data["tides"] = fetch_tides()
+            ok.append("tides")
+        except Exception as e:  # noqa: BLE001
+            log("tides failed: %s" % e)
     if "--no-outlook" not in argv:
         try:
             data["outlook"] = fetch_outlook()
@@ -314,6 +361,8 @@ def main(argv):
         f.write("\n")
     noaa = data.get("noaa", {})
     log("wrote %s: sources ok=%s, NWS issued %s" % (OUT, ",".join(ok), noaa.get("issued")))
+    for name, st in data.get("tides", {}).get("stations", {}).items():
+        log("  tide %-9s %s: %d events, %s .. %s" % (name, st["id"], len(st["events"]), st["events"][0]["t"], st["events"][-1]["t"]))
     for sh in data.get("outlook", {}).get("shores", []):
         log("  %-5s %-20s %s" % (sh["name"], sh["sub"], "  ".join("%s %s-%s" % (x["date"][5:], x["lo"], x["hi"]) for x in sh["days"])))
     return 0
