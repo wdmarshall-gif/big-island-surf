@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-17T21:30:15Z",
+ "updatedAt": "2026-10-17T21:33:31Z",
  "noaa": {
   "header": "FZHW52 PHFO 171810",
   "issued": "810 AM HST Sat Oct 17 2026",
@@ -231,7 +231,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine model, swell wave height",
-  "generated": "2026-10-17T21:30:13Z",
+  "generated": "2026-10-17T21:33:29Z",
   "shores": [
    {
     "key": "west",
@@ -457,7 +457,7 @@
  },
  "tides": {
   "source": "NOAA CO-OPS tide predictions, feet above MLLW",
-  "generated": "2026-10-17T21:30:13Z",
+  "generated": "2026-10-17T21:33:29Z",
   "stations": {
    "Kona": {
     "id": "1617846",
