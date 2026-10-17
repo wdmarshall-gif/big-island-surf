@@ -92,7 +92,7 @@ a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-o
 .swells{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:6px}
 .swell{display:flex; align-items:flex-start; gap:7px; padding:7px 10px 7px 7px; border-radius:10px; background:var(--sea); font-size:12.5px; line-height:1.3; min-width:0}
 .swell svg{margin-top:1px; width:18px; height:18px}
-.arrow-key svg{width:16px; height:16px; flex:none}
+.arrow-key svg{width:18px; height:18px; flex:none}
 .swell svg{flex:none}
 .swell b{font-family:var(--f-mono); font-weight:500; font-size:13px}
 .swell .tr{color:var(--ink-2)}
@@ -198,7 +198,7 @@ footer .links{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mo
   <section class="surf" aria-label="Surf map and forecast heights">
     <figure class="map">
       <div class="timebar" id="timebar" role="tablist" aria-label="Forecast time shown on the map"></div>
-      <svg id="map" viewBox="0 0 420 470" role="img" aria-label="Map of Hawaiʻi Island with coastlines colored by forecast surf height and arrows for incoming swells"></svg>
+      <svg id="map" viewBox="-24 -14 468 498" role="img" aria-label="Map of Hawaiʻi Island with coastlines colored by forecast surf height and arrows for incoming swells"></svg>
       <figcaption class="map-key">
         <div class="legend" id="legend"></div>
         <div class="arrow-key" id="arrow-key">Arrows point the way each swell travels</div>
@@ -412,13 +412,17 @@ const SEGS = {
 };
 const TOWNS = [{name:'Kona', p:P[18], dx:9, anchor:'start'}, {name:'Hilo', p:P[6], dx:-9, anchor:'end'}];
 
-function arrowAt(x1, y1, x2, y2, w, cls){
-  const a = Math.atan2(y2 - y1, x2 - x1), hl = 8 + w * 1.6, hw = 4 + w * 1.1;
+function arrowAt(x1, y1, x2, y2, w, cls, halo){
+  const a = Math.atan2(y2 - y1, x2 - x1), hl = halo ? 10 + w * 1.7 : 8 + w * 1.6, hw = halo ? 6 + w * 1.15 : 4 + w * 1.1;
   const bx = x2 - Math.cos(a) * hl, by = y2 - Math.sin(a) * hl;
   const lx = bx + Math.sin(a) * hw, ly = by - Math.cos(a) * hw;
   const rx = bx - Math.sin(a) * hw, ry = by + Math.cos(a) * hw;
-  return '<line class="' + cls + '" x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(bx) + '" y2="' + f1(by) + '" stroke-width="' + w + '" stroke-linecap="round"/>' +
-         '<polygon class="' + cls + '-h" points="' + f1(x2) + ',' + f1(y2) + ' ' + f1(lx) + ',' + f1(ly) + ' ' + f1(rx) + ',' + f1(ry) + '"/>';
+  const pts = f1(x2) + ',' + f1(y2) + ' ' + f1(lx) + ',' + f1(ly) + ' ' + f1(rx) + ',' + f1(ry);
+  const shaft = 'x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(bx) + '" y2="' + f1(by) + '"';
+  // halo: a sheet-colored outline so the arrow stands clear of the ring and contour lines
+  return (halo ? '<line class="ah" ' + shaft + ' stroke-width="' + (w + 5) + '" stroke-linecap="round"/><polygon class="ah" points="' + pts + '" stroke-width="5" stroke-linejoin="round"/>' : '') +
+    '<line class="' + cls + '" ' + shaft + ' stroke-width="' + w + '" stroke-linecap="round"/>' +
+    '<polygon class="' + cls + '-h" points="' + pts + '"/>';
 }
 const unit = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];
 
@@ -438,7 +442,8 @@ function drawMap(rows, slotIdx, swells){
     '.sa{stroke:var(--ink)} .sa-h{fill:var(--ink)}' +
     '.sb{stroke:var(--accent)} .sb-h{fill:var(--accent)}' +
     '.sd{stroke:var(--ink-3)} .sd-h{fill:var(--ink-3)}' +
-    '.al{fill:var(--ink);font:600 11px var(--f-mono)}' +
+    '.al{fill:var(--ink);font:700 12.5px var(--f-mono);paint-order:stroke;stroke:var(--sheet);stroke-width:4px;stroke-linejoin:round}' +
+    '.ah{stroke:var(--sheet);fill:var(--sheet)}' +
     '</style>';
   // compass ring + depth contours
   s += '<circle class="rg" cx="' + CX + '" cy="' + CY + '" r="' + RING + '" stroke-width="1"/>';
@@ -446,7 +451,7 @@ function drawMap(rows, slotIdx, swells){
     const u = unit(d), big = d % 90 === 0;
     s += '<line class="tk" x1="' + f1(CX + u[0] * RING) + '" y1="' + f1(CY + u[1] * RING) + '" x2="' + f1(CX + u[0] * (RING - (big ? 9 : 5))) + '" y2="' + f1(CY + u[1] * (RING - (big ? 9 : 5))) + '" stroke-width="1"/>';
   }
-  s += '<text class="cmp" x="' + CX + '" y="' + (CY - RING - 8) + '" text-anchor="middle">N</text>';
+  s += '<text class="cmp" x="' + CX + '" y="' + (CY - RING + 24) + '" text-anchor="middle">N</text>';
   [1.36, 1.25, 1.15, 1.07].forEach((k, i) => {
     s += '<path class="ct" d="' + ISLAND + '" transform="translate(' + CX + ' ' + CY + ') scale(' + k + ') translate(' + (-CX) + ' ' + (-CY) + ')" vector-effect="non-scaling-stroke" stroke-width="1" opacity="' + (0.45 + i * 0.18).toFixed(2) + '"/>';
   });
@@ -465,15 +470,15 @@ function drawMap(rows, slotIdx, swells){
   TOWNS.forEach(t => {
     s += '<circle class="td" cx="' + f1(t.p[0]) + '" cy="' + f1(t.p[1]) + '" r="2.6"/><text class="town" x="' + f1(t.p[0] + t.dx) + '" y="' + f1(t.p[1] + 4) + '" text-anchor="' + t.anchor + '">' + t.name + '</text>';
   });
-  // swell arrows (from the ring toward the island)
+  // swell arrows: straddle the compass ring, pointing toward the island (the way the swell travels)
   (swells || []).forEach(sw => {
     const u = unit(sw.deg);
-    const w = sw.trade ? 1.6 : sw.period === 'long' ? 3.4 : sw.period === 'medium' ? 2.6 : 2;
+    const w = sw.trade ? 3.2 : sw.period === 'long' ? 5.2 : sw.period === 'medium' ? 4.3 : 3.6;
     const cls = (sw.trend === 'declining') ? 'sd' : (sw.trend === 'building' || sw.trend === 'incoming') ? 'sb' : 'sa';
-    const r1 = RING - 2, r2 = RING - 25;
-    s += arrowAt(CX + u[0] * r1, CY + u[1] * r1, CX + u[0] * r2, CY + u[1] * r2, w, cls);
-    const lr = RING - 13, px = -u[1] * 14, py = u[0] * 14;
-    s += '<text class="al" x="' + f1(CX + u[0] * lr + px) + '" y="' + f1(CY + u[1] * lr + py + 4) + '" text-anchor="middle">' + esc(sw.dir) + '</text>';
+    const r1 = RING + 20, r2 = RING - 14;
+    s += arrowAt(CX + u[0] * r1, CY + u[1] * r1, CX + u[0] * r2, CY + u[1] * r2, w, cls, true);
+    const lr = RING + 9, px = -u[1] * 19, py = u[0] * 19;
+    s += '<text class="al" x="' + f1(CX + u[0] * lr + px) + '" y="' + f1(CY + u[1] * lr + py + 4.5) + '" text-anchor="middle">' + esc(sw.dir) + '</text>';
   });
   // shore labels
   Object.keys(SEGS).forEach(k => {
