@@ -1,10 +1,10 @@
 {
- "updatedAt": "2026-11-04T18:01:41Z",
+ "updatedAt": "2026-11-04T20:57:25Z",
  "noaa": {
-  "header": "FZHW52 PHFO 041346",
-  "issued": "346 AM HST Wed Nov 4 2026",
-  "issuedISO": "2026-11-04T03:46:00-10:00",
-  "discussion": "Surf along north and west-facing shores will continue to decrease through today as the current small north-northwest swell fades and shifts more northerly. A more significant moderate, long- period northwest swell will arrive tonight into Thursday morning and will easily push north and west shore surf to advisory levels for Thursday into Friday. An additional medium-period moderate swell is expected to fill in on Saturday, likely prolonging moderate to large surf action into the weekend. Surf along south facing shores will remain below average today, but should see a small boost Thursday into Friday out of the south- southwest. East-facing shores will remain elevated and choppy through much of the week with the strong trades.",
+  "header": "FZHW52 PHFO 041820",
+  "issued": "820 AM HST Wed Nov 4 2026",
+  "issuedISO": "2026-11-04T08:20:00-10:00",
+  "discussion": "North and west-facing shore surf will continue to fall as a small north northwest swell fades and turns more northerly. A moderate size, long period northwest swell will arrive overnight. This swell will push north and west-facing shore surf to high surf advisory levels Thursday into Friday. A moderate size, medium period swell is expected to fill in Saturday and this will likely prolong the elevated north northwest surf through the weekend. Surf along south-facing shores will remain below average today, but will experience a small boost Thursday into Friday from the arrival of a small south southwest swell. Moderate to strong trade winds will ensure east-facing shore choppy wind wave conditions through the remainder of the week.",
   "zones": [
    {
     "key": "windward",
@@ -56,8 +56,8 @@
     ],
     "days": [
      {
-      "label": "Today",
-      "weather": "Cloudy. Showers.",
+      "label": "Rest Of Today",
+      "weather": "Mostly cloudy. Widespread showers.",
       "tempLabel": "High",
       "temp": "In the lower 80s.",
       "winds": "Northeast winds around 10 mph.",
@@ -157,11 +157,11 @@
     ],
     "days": [
      {
-      "label": "Today",
-      "weather": "Mostly sunny.",
+      "label": "Rest Of Today",
+      "weather": "Mostly sunny. Isolated showers.",
       "tempLabel": "High",
       "temp": "In the mid 80s.",
-      "winds": "South winds around 5 mph, becoming west in the afternoon.",
+      "winds": "West winds around 5 mph.",
       "sunrise": "6:26 AM",
       "sunset": "5:49 PM"
      },
@@ -188,11 +188,6 @@
      {
       "station": "Kona",
       "events": [
-       {
-        "type": "Low",
-        "ft": 0.5,
-        "t": "2026-11-04T06:12:00-10:00"
-       },
        {
         "type": "High",
         "ft": 1.8,
@@ -223,11 +218,6 @@
      {
       "station": "Kawaihae",
       "events": [
-       {
-        "type": "Low",
-        "ft": 0.6,
-        "t": "2026-11-04T06:35:00-10:00"
-       },
        {
         "type": "High",
         "ft": 1.8,
@@ -261,7 +251,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine model, swell wave height",
-  "generated": "2026-11-04T18:01:38Z",
+  "generated": "2026-11-04T20:57:22Z",
   "shores": [
    {
     "key": "west",
@@ -487,7 +477,7 @@
  },
  "tides": {
   "source": "NOAA CO-OPS tide predictions, feet above MLLW",
-  "generated": "2026-11-04T18:01:38Z",
+  "generated": "2026-11-04T20:57:22Z",
   "stations": {
    "Kona": {
     "id": "1617846",
