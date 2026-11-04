@@ -14,6 +14,7 @@ Usage:
   python3 scripts/update.py --srf-file FILE     # parse a saved SRF product instead of fetching it
   python3 scripts/update.py --no-outlook         # skip the 7-day swell fetch
   python3 scripts/update.py --no-tides           # skip the NOAA tide fetch
+  python3 scripts/update.py --if-missed          # retry check-in: update only if the last scheduled update never landed
 """
 import datetime as dt
 import json
@@ -339,6 +340,35 @@ def fetch_tides():
     }
 
 
+# ---------------------------------------------------------------- retry check-ins
+
+# The twice-daily schedule in .github/workflows/update.yml, as (hour, minute) UTC. Keep the two in sync.
+SCHEDULED_UTC = ((2, 47), (14, 47))
+# Check-ins run 4 and 8 hours after a scheduled update, so the update a check-in covers
+# is the latest scheduled time at least this long before it actually starts.
+CHECKIN_GAP = dt.timedelta(hours=4)
+
+
+def scheduled_before(t):
+    """The latest scheduled update time at or before t."""
+    for back in (0, 1):
+        d = t.date() - dt.timedelta(days=back)
+        for h, m in reversed(SCHEDULED_UTC):
+            s = dt.datetime(d.year, d.month, d.day, h, m, tzinfo=dt.timezone.utc)
+            if s <= t:
+                return s
+
+
+def missed_update(prev, now):
+    """For a check-in: the scheduled time it covers, and True if nothing was published since then."""
+    due = scheduled_before(now - CHECKIN_GAP)
+    try:
+        last = dt.datetime.strptime(prev["updatedAt"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    except (KeyError, TypeError, ValueError):
+        return due, True
+    return due, last < due
+
+
 # ---------------------------------------------------------------- main
 
 def main(argv):
@@ -348,6 +378,14 @@ def main(argv):
             prev = json.load(f)
     except Exception:  # noqa: BLE001
         prev = {}
+
+    if "--if-missed" in argv:
+        due, missed = missed_update(prev, dt.datetime.now(dt.timezone.utc))
+        if not missed:
+            log("data.json was updated %s, after the %s scheduled update; nothing to retry"
+                % (prev["updatedAt"], due.strftime("%Y-%m-%d %H:%M UTC")))
+            return 0
+        log("nothing published since the %s scheduled update; retrying it" % due.strftime("%Y-%m-%d %H:%M UTC"))
 
     data = dict(prev)
     data.pop("bin", None)

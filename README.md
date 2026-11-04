@@ -6,7 +6,7 @@ A one-page surf forecast for Hawaiʻi Island only: a map with each coastline col
 
 ## How it updates
 
-A GitHub Actions workflow (`.github/workflows/update.yml`) runs twice a day, at about 4:47 AM and 4:47 PM HST, shortly after each NWS forecast comes out. It runs `scripts/update.py`. It pulls the NWS Honolulu Surf Zone Forecast (SRFHFO), keeping only the discussion and the two Big Island zones, plus 7-day offshore swell height off each shore from Open-Meteo's marine model and 5 days of NOAA tide predictions for Kona, Kawaihae and Hilo, then commits the fresh `data.json`. Cloudflare Pages and GitHub Pages both serve this `gh-pages` branch and redeploy on every commit. If a source is unreachable, its previous data stays up.
+A GitHub Actions workflow (`.github/workflows/update.yml`) runs twice a day, at about 4:47 AM and 4:47 PM HST, shortly after each NWS forecast comes out. It runs `scripts/update.py`. It pulls the NWS Honolulu Surf Zone Forecast (SRFHFO), keeping only the discussion and the two Big Island zones, plus 7-day offshore swell height off each shore from Open-Meteo's marine model and 5 days of NOAA tide predictions for Kona, Kawaihae and Hilo, then commits the fresh `data.json`. Cloudflare Pages and GitHub Pages both serve this `gh-pages` branch and redeploy on every commit. If a source is unreachable, its previous data stays up. If a scheduled update fails or GitHub skips it, check-in runs 4 and 8 hours later retry it; when the scheduled update worked, they stop within seconds without changing anything.
 
 To refresh right away: **Actions → Update surf data → Run workflow**.
 
