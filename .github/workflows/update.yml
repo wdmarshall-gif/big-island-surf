@@ -19,8 +19,9 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fetch the NWS surf forecast and 7-day swell
         run: python3 scripts/update.py
@@ -34,5 +35,15 @@ jobs:
             echo "No change"
           else
             git commit -q -m "Update surf data"
-            git push -q
+            # GitHub occasionally rejects a push with a temporary server error.
+            # Try up to 3 times, waiting 20s then 60s, rebasing in case the branch moved.
+            for wait in 20 60 0; do
+              git push -q && exit 0
+              [ "$wait" -eq 0 ] && break
+              echo "Push failed; retrying in ${wait}s"
+              sleep "$wait"
+              git pull -q --rebase -X theirs origin gh-pages || { git rebase --abort; break; }
+            done
+            echo "::error::Push failed after 3 attempts; the next scheduled run will try again"
+            exit 1
           fi

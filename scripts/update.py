@@ -20,6 +20,8 @@ import json
 import os
 import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -36,13 +38,31 @@ def log(msg):
     print(msg, file=sys.stderr)
 
 
+RETRY_WAITS = (5, 15)   # seconds; at most 2 retries per request, only for temporary failures
+
+
+def _transient(e):
+    """True for errors worth retrying: server errors, rate limiting, timeouts, dropped connections."""
+    if isinstance(e, urllib.error.HTTPError):
+        return e.code == 429 or e.code >= 500
+    return isinstance(e, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
 def get(url, accept="*/*"):
     req = urllib.request.Request(url, headers={
         "User-Agent": NWS_UA,
         "Accept": accept,
     })
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read().decode("utf-8", "replace")
+    for attempt in range(len(RETRY_WAITS) + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return r.read().decode("utf-8", "replace")
+        except Exception as e:  # noqa: BLE001
+            if attempt == len(RETRY_WAITS) or not _transient(e):
+                raise
+            wait = RETRY_WAITS[attempt]
+            log("  %s: %s; retrying in %ds" % (urllib.parse.urlsplit(url).netloc, e, wait))
+            time.sleep(wait)
 
 
 def squash(s):
