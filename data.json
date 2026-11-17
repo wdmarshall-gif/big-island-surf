@@ -1,20 +1,20 @@
 {
- "updatedAt": "2026-11-16T23:32:14Z",
+ "updatedAt": "2026-11-17T11:13:49Z",
  "noaa": {
-  "header": "FZHW52 PHFO 161805",
-  "issued": "805 AM HST Mon Nov 16 2026",
-  "issuedISO": "2026-11-16T08:05:00-10:00",
-  "discussion": "A moderate, medium-period north swell will produce advisory level surf along north facing shores on Big Island and Maui through tonight. Near advisory level surf is also expected along north- facing shores and some exposed eastern shores of the rest of the islands. The north swell will gradually decline later today through Wednesday. A small north- northwest swell will be possible during the weekend. Rough surf along east-facing shores will remain above seasonal average today due to elevated trade wind swell and some wrapping north swell. East shore surf is expected to be around seasonal average Tuesday through Thursday, followed by a slight increase Friday through the weekend. Mainly small background level surf will persist along south-facing shores during the next several days, with a small long-period swell possible on Friday.",
+  "header": "FZHW52 PHFO 170647",
+  "issued": "847 PM HST Mon Nov 16 2026",
+  "issuedISO": "2026-11-16T20:47:00-10:00",
+  "discussion": "A moderate, medium period north swell will gradually decline over he next couple of days. The bulk of the swell was aimed just east of the state, but surf along north-facing shores of Big Island and Maui will remain elevated at the High Surf Advisory level through much of the night. North shore surf and the magnitude of the harbor surges will slowly decline on Tuesday and fade on Wednesday. Small background northwest and north swells will keep small to tiny surf in place Wednesday through Friday, then a small north-northwest swell will be possible during the weekend. Rough surf along east-facing shores will remain above seasonal average through Tuesday due to elevated trade wind swell and some wrapping north swell. East shore surf is expected to be around seasonal average Wednesday and Thursday, followed by a brief and slight increase Friday and Saturday. Mainly small background level surf will persist along south-facing shores during the next several days, with a small long-period swell possible on Friday.",
   "zones": [
    {
     "key": "windward",
     "name": "Big Island Windward and Southeast",
     "periods": [
      {
-      "label": "Today",
+      "label": "Tonight",
       "cols": [
-       "AM",
-       "PM"
+       "PM",
+       "AM"
       ]
      },
      {
@@ -30,8 +30,8 @@
       "facing": "North",
       "values": [
        "10-15",
-       "10-15",
-       "10-14",
+       "8-12",
+       "8-12",
        "7-10"
       ]
      },
@@ -41,7 +41,7 @@
        "6-8",
        "6-8",
        "6-8",
-       "5-7"
+       "6-8"
       ]
      },
      {
@@ -56,29 +56,20 @@
     ],
     "days": [
      {
-      "label": "Rest Of Today",
-      "weather": "Mostly sunny. Numerous showers.",
-      "tempLabel": "High",
-      "temp": "In the lower 80s.",
-      "winds": "East winds around 10 mph.",
-      "sunrise": "6:29 AM",
-      "sunset": "5:41 PM"
-     },
-     {
       "label": "Tonight",
-      "weather": "Cloudy. Showers.",
+      "weather": "Cloudy. Frequent showers.",
       "tempLabel": "Low",
       "temp": "In the upper 60s.",
-      "winds": "Northeast winds around 5 mph.",
+      "winds": "North winds around 5 mph.",
       "sunrise": null,
       "sunset": null
      },
      {
       "label": "Tuesday",
-      "weather": "Mostly cloudy. Showers.",
+      "weather": "Cloudy. Frequent showers.",
       "tempLabel": "High",
       "temp": "In the lower 80s.",
-      "winds": "East winds 10 to 15 mph.",
+      "winds": "East winds around 5 mph.",
       "sunrise": "6:29 AM",
       "sunset": "5:41 PM"
      }
@@ -87,16 +78,6 @@
      {
       "station": "Hilo Bay",
       "events": [
-       {
-        "type": "High",
-        "ft": 2.2,
-        "t": "2026-11-16T08:33:00-10:00"
-       },
-       {
-        "type": "Low",
-        "ft": 0.8,
-        "t": "2026-11-16T16:22:00-10:00"
-       },
        {
         "type": "High",
         "ft": 1.0,
@@ -126,10 +107,10 @@
     "name": "Big Island Leeward",
     "periods": [
      {
-      "label": "Today",
+      "label": "Tonight",
       "cols": [
-       "AM",
-       "PM"
+       "PM",
+       "AM"
       ]
      },
      {
@@ -144,10 +125,10 @@
      {
       "facing": "West",
       "values": [
-       "3-5",
-       "3-5",
-       "3-5",
-       "3-5"
+       "2-4",
+       "2-4",
+       "2-4",
+       "2-4"
       ]
      },
      {
@@ -162,26 +143,17 @@
     ],
     "days": [
      {
-      "label": "Rest Of Today",
-      "weather": "Mostly sunny. Scattered showers.",
-      "tempLabel": "High",
-      "temp": "In the mid 80s.",
-      "winds": "West winds around 5 mph.",
-      "sunrise": "6:33 AM",
-      "sunset": "5:45 PM"
-     },
-     {
       "label": "Tonight",
-      "weather": "Partly cloudy.",
+      "weather": "Mostly cloudy until 12 AM, then partly cloudy.",
       "tempLabel": "Low",
       "temp": "In the upper 60s.",
-      "winds": "Light and variable winds.",
+      "winds": "East winds around 5 mph.",
       "sunrise": null,
       "sunset": null
      },
      {
       "label": "Tuesday",
-      "weather": "Mostly sunny.",
+      "weather": "Mostly sunny. Isolated showers.",
       "tempLabel": "High",
       "temp": "In the mid 80s.",
       "winds": "Light and variable winds.",
@@ -193,16 +165,6 @@
      {
       "station": "Kona",
       "events": [
-       {
-        "type": "High",
-        "ft": 1.7,
-        "t": "2026-11-16T09:11:00-10:00"
-       },
-       {
-        "type": "Low",
-        "ft": 0.5,
-        "t": "2026-11-16T16:59:00-10:00"
-       },
        {
         "type": "High",
         "ft": 0.8,
@@ -228,16 +190,6 @@
      {
       "station": "Kawaihae",
       "events": [
-       {
-        "type": "High",
-        "ft": 1.9,
-        "t": "2026-11-16T08:58:00-10:00"
-       },
-       {
-        "type": "Low",
-        "ft": 0.4,
-        "t": "2026-11-16T16:50:00-10:00"
-       },
        {
         "type": "High",
         "ft": 0.9,
@@ -266,7 +218,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine model, swell wave height",
-  "generated": "2026-11-16T23:32:11Z",
+  "generated": "2026-11-17T11:13:46Z",
   "shores": [
    {
     "key": "west",
@@ -276,39 +228,39 @@
     "lon": -156.15,
     "days": [
      {
-      "date": "2026-11-16",
-      "lo": 2.7,
-      "hi": 3.0
-     },
-     {
       "date": "2026-11-17",
-      "lo": 2.6,
-      "hi": 2.8
+      "lo": 2.0,
+      "hi": 2.7
      },
      {
       "date": "2026-11-18",
       "lo": 1.8,
-      "hi": 2.2
+      "hi": 2.4
      },
      {
       "date": "2026-11-19",
-      "lo": 1.6,
-      "hi": 2.0
+      "lo": 1.7,
+      "hi": 2.1
      },
      {
       "date": "2026-11-20",
-      "lo": 1.5,
-      "hi": 2.2
+      "lo": 1.7,
+      "hi": 2.5
      },
      {
       "date": "2026-11-21",
-      "lo": 2.0,
-      "hi": 2.2
+      "lo": 2.2,
+      "hi": 2.4
      },
      {
       "date": "2026-11-22",
       "lo": 1.6,
-      "hi": 1.8
+      "hi": 1.9
+     },
+     {
+      "date": "2026-11-23",
+      "lo": 1.3,
+      "hi": 1.4
      }
     ]
    },
@@ -320,39 +272,39 @@
     "lon": -156.0,
     "days": [
      {
-      "date": "2026-11-16",
-      "lo": 5.4,
-      "hi": 5.9
-     },
-     {
       "date": "2026-11-17",
-      "lo": 5.1,
-      "hi": 5.4
+      "lo": 5.0,
+      "hi": 5.2
      },
      {
       "date": "2026-11-18",
-      "lo": 4.9,
+      "lo": 4.8,
       "hi": 5.4
      },
      {
       "date": "2026-11-19",
-      "lo": 4.7,
-      "hi": 5.3
+      "lo": 3.7,
+      "hi": 4.7
      },
      {
       "date": "2026-11-20",
-      "lo": 4.9,
-      "hi": 5.5
+      "lo": 4.5,
+      "hi": 5.4
      },
      {
       "date": "2026-11-21",
-      "lo": 4.5,
-      "hi": 4.8
+      "lo": 4.3,
+      "hi": 4.7
      },
      {
       "date": "2026-11-22",
-      "lo": 4.1,
-      "hi": 4.3
+      "lo": 3.6,
+      "hi": 4.1
+     },
+     {
+      "date": "2026-11-23",
+      "lo": 3.0,
+      "hi": 3.3
      }
     ]
    },
@@ -364,38 +316,38 @@
     "lon": -155.45,
     "days": [
      {
-      "date": "2026-11-16",
-      "lo": 3.3,
-      "hi": 5.0
-     },
-     {
       "date": "2026-11-17",
-      "lo": 3.0,
-      "hi": 4.9
+      "lo": 3.8,
+      "hi": 5.1
      },
      {
       "date": "2026-11-18",
-      "lo": 4.1,
-      "hi": 6.3
+      "lo": 3.7,
+      "hi": 6.2
      },
      {
       "date": "2026-11-19",
-      "lo": 3.7,
-      "hi": 5.0
+      "lo": 1.9,
+      "hi": 4.5
      },
      {
       "date": "2026-11-20",
-      "lo": 2.6,
-      "hi": 5.0
+      "lo": 2.4,
+      "hi": 3.9
      },
      {
       "date": "2026-11-21",
-      "lo": 4.7,
-      "hi": 6.0
+      "lo": 4.3,
+      "hi": 5.1
      },
      {
       "date": "2026-11-22",
-      "lo": 2.0,
+      "lo": 2.8,
+      "hi": 4.7
+     },
+     {
+      "date": "2026-11-23",
+      "lo": 3.4,
       "hi": 4.3
      }
     ]
@@ -408,39 +360,39 @@
     "lon": -155.55,
     "days": [
      {
-      "date": "2026-11-16",
-      "lo": 5.6,
-      "hi": 7.5
-     },
-     {
       "date": "2026-11-17",
-      "lo": 4.9,
-      "hi": 6.2
+      "lo": 4.8,
+      "hi": 6.5
      },
      {
       "date": "2026-11-18",
-      "lo": 6.1,
+      "lo": 6.0,
       "hi": 6.6
      },
      {
       "date": "2026-11-19",
-      "lo": 5.3,
-      "hi": 5.8
-     },
-     {
-      "date": "2026-11-20",
-      "lo": 4.8,
+      "lo": 5.2,
       "hi": 5.6
      },
      {
-      "date": "2026-11-21",
+      "date": "2026-11-20",
       "lo": 5.2,
-      "hi": 6.2
+      "hi": 5.8
+     },
+     {
+      "date": "2026-11-21",
+      "lo": 4.9,
+      "hi": 5.8
      },
      {
       "date": "2026-11-22",
-      "lo": 3.7,
-      "hi": 4.9
+      "lo": 3.4,
+      "hi": 4.1
+     },
+     {
+      "date": "2026-11-23",
+      "lo": 2.7,
+      "hi": 3.0
      }
     ]
    },
@@ -452,39 +404,39 @@
     "lon": -154.85,
     "days": [
      {
-      "date": "2026-11-16",
-      "lo": 6.4,
-      "hi": 7.6
-     },
-     {
       "date": "2026-11-17",
-      "lo": 5.5,
-      "hi": 8.3
+      "lo": 5.8,
+      "hi": 8.2
      },
      {
       "date": "2026-11-18",
-      "lo": 7.7,
+      "lo": 7.5,
       "hi": 8.2
      },
      {
       "date": "2026-11-19",
-      "lo": 6.9,
-      "hi": 7.5
+      "lo": 6.7,
+      "hi": 7.0
      },
      {
       "date": "2026-11-20",
       "lo": 7.1,
-      "hi": 7.5
+      "hi": 7.4
      },
      {
       "date": "2026-11-21",
-      "lo": 6.6,
+      "lo": 6.0,
       "hi": 7.4
      },
      {
       "date": "2026-11-22",
-      "lo": 4.5,
-      "hi": 5.9
+      "lo": 4.4,
+      "hi": 5.2
+     },
+     {
+      "date": "2026-11-23",
+      "lo": 3.5,
+      "hi": 3.9
      }
     ]
    }
@@ -492,26 +444,11 @@
  },
  "tides": {
   "source": "NOAA CO-OPS tide predictions, feet above MLLW",
-  "generated": "2026-11-16T23:32:11Z",
+  "generated": "2026-11-17T11:13:46Z",
   "stations": {
    "Kona": {
     "id": "1617846",
     "events": [
-     {
-      "type": "High",
-      "ft": 1.79,
-      "t": "2026-11-15T08:09:00-10:00"
-     },
-     {
-      "type": "Low",
-      "ft": 0.6,
-      "t": "2026-11-15T16:10:00-10:00"
-     },
-     {
-      "type": "High",
-      "ft": 0.76,
-      "t": "2026-11-15T18:56:00-10:00"
-     },
      {
       "type": "Low",
       "ft": 0.39,
@@ -586,32 +523,32 @@
       "type": "Low",
       "ft": 0.17,
       "t": "2026-11-19T18:16:00-10:00"
+     },
+     {
+      "type": "High",
+      "ft": 1.58,
+      "t": "2026-11-20T01:01:00-10:00"
+     },
+     {
+      "type": "Low",
+      "ft": 0.62,
+      "t": "2026-11-20T06:40:00-10:00"
+     },
+     {
+      "type": "High",
+      "ft": 1.55,
+      "t": "2026-11-20T12:13:00-10:00"
+     },
+     {
+      "type": "Low",
+      "ft": 0.02,
+      "t": "2026-11-20T18:44:00-10:00"
      }
     ]
    },
    "Kawaihae": {
     "id": "1617433",
     "events": [
-     {
-      "type": "Low",
-      "ft": 0.4,
-      "t": "2026-11-15T00:02:00-10:00"
-     },
-     {
-      "type": "High",
-      "ft": 2.03,
-      "t": "2026-11-15T08:03:00-10:00"
-     },
-     {
-      "type": "Low",
-      "ft": 0.43,
-      "t": "2026-11-15T16:01:00-10:00"
-     },
-     {
-      "type": "High",
-      "ft": 0.69,
-      "t": "2026-11-15T21:09:00-10:00"
-     },
      {
       "type": "Low",
       "ft": 0.57,
@@ -686,27 +623,32 @@
       "type": "Low",
       "ft": 0.1,
       "t": "2026-11-19T18:23:00-10:00"
+     },
+     {
+      "type": "High",
+      "ft": 1.77,
+      "t": "2026-11-20T01:17:00-10:00"
+     },
+     {
+      "type": "Low",
+      "ft": 0.7,
+      "t": "2026-11-20T07:16:00-10:00"
+     },
+     {
+      "type": "High",
+      "ft": 1.45,
+      "t": "2026-11-20T12:28:00-10:00"
+     },
+     {
+      "type": "Low",
+      "ft": -0.02,
+      "t": "2026-11-20T18:51:00-10:00"
      }
     ]
    },
    "Hilo Bay": {
     "id": "1617760",
     "events": [
-     {
-      "type": "High",
-      "ft": 2.24,
-      "t": "2026-11-15T07:31:00-10:00"
-     },
-     {
-      "type": "Low",
-      "ft": 0.9,
-      "t": "2026-11-15T15:33:00-10:00"
-     },
-     {
-      "type": "High",
-      "ft": 0.95,
-      "t": "2026-11-15T18:18:00-10:00"
-     },
      {
       "type": "Low",
       "ft": 0.58,
@@ -781,6 +723,26 @@
       "type": "Low",
       "ft": 0.25,
       "t": "2026-11-19T17:39:00-10:00"
+     },
+     {
+      "type": "High",
+      "ft": 1.97,
+      "t": "2026-11-20T00:23:00-10:00"
+     },
+     {
+      "type": "Low",
+      "ft": 0.93,
+      "t": "2026-11-20T06:03:00-10:00"
+     },
+     {
+      "type": "High",
+      "ft": 1.93,
+      "t": "2026-11-20T11:35:00-10:00"
+     },
+     {
+      "type": "Low",
+      "ft": 0.03,
+      "t": "2026-11-20T18:07:00-10:00"
      }
     ]
    }
