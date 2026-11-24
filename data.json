@@ -1,24 +1,24 @@
 {
- "updatedAt": "2026-11-24T12:57:33Z",
+ "updatedAt": "2026-11-24T23:39:22Z",
  "noaa": {
-  "header": "FZHW52 PHFO 240210",
-  "issued": "410 PM HST Mon Nov 23 2026",
-  "issuedISO": "2026-11-23T16:10:00-10:00",
-  "discussion": "Surf along north-and west facing shores will rise to warning levels on Tuesday as a large to extra large, long-period north- northwest swell fills in tonight through Tuesday night. This swell will fade slightly heading into Wednesday before becoming overshadowed by an extra large, long-period north-northwest swell Wednesday night into Thursday that is expected to bring another round of warning level surf to north-and west-facing shores before gradually fading into the weekend. Surf heights along east-facing shores will continue to decline into the evening as the trades ease. Some wrapping north swell can be expected as each northwest swell moves through. Due to the swell angle (350 degrees), eastern shores of Oahu have been included in the current High Surf Warning. Surf along south-facing shores will remain small through the period, with minor bumps in long-period energy expected midweek and over the weekend.",
+  "header": "FZHW52 PHFO 241913",
+  "issued": "913 AM HST Tue Nov 24 2026",
+  "issuedISO": "2026-11-24T09:13:00-10:00",
+  "discussion": "Surf along north and west facing shores will build to warning levels today as a large, long-period north-northwest swell fills in. This swell will fade to advisory level heading into Wednesday before becoming overshadowed by an extra large, long-period north-northwest swell Wednesday night into Thursday that is expected to bring another round of warning level surf to north-and west-facing shores before gradually fading into the weekend. Surf heights along east-facing shores will increase today as north swell wraps into east shores. Due to the swell angle (350 degrees), eastern shores of Oahu have been included in the current High Surf Warning. Another round of wrapping swell is possible with the extra large north-northwest swell on Thursday into Friday. This swell will shift more northerly with time, so more swell energy will make it into east-facing shores by Friday even as the swell begins fading. Surf along south-facing shores will remain small through the period, with minor bumps in long-period energy expected late Wednesday and over the weekend.",
   "zones": [
    {
     "key": "windward",
     "name": "Big Island Windward and Southeast",
     "periods": [
      {
-      "label": "Tonight",
+      "label": "Today",
       "cols": [
-       "PM",
-       "AM"
+       "AM",
+       "PM"
       ]
      },
      {
-      "label": "Tuesday",
+      "label": "Wednesday",
       "cols": [
        "AM",
        "PM"
@@ -29,19 +29,19 @@
      {
       "facing": "North",
       "values": [
-       "2-4",
-       "4-6",
-       "20-25",
-       "20-30"
+       "7-10",
+       "15-20",
+       "15-20",
+       "12-16"
       ]
      },
      {
       "facing": "East",
       "values": [
        "3-5",
-       "2-4",
        "4-6",
-       "5-7"
+       "4-6",
+       "4-6"
       ]
      },
      {
@@ -56,21 +56,30 @@
     ],
     "days": [
      {
+      "label": "Rest Of Today",
+      "weather": "Mostly sunny. Isolated showers.",
+      "tempLabel": "High",
+      "temp": "In the lower 80s.",
+      "winds": "West winds around 5 mph, becoming east in the afternoon.",
+      "sunrise": "6:33 AM",
+      "sunset": "5:40 PM"
+     },
+     {
       "label": "Tonight",
-      "weather": "Partly sunny until 6 PM, then partly cloudy. Isolated showers.",
+      "weather": "Partly cloudy. Isolated showers.",
       "tempLabel": "Low",
       "temp": "In the upper 60s.",
-      "winds": "North winds 5 to 10 mph.",
+      "winds": "West winds around 5 mph.",
       "sunrise": null,
       "sunset": null
      },
      {
-      "label": "Tuesday",
-      "weather": "Sunny. Isolated showers.",
+      "label": "Wednesday",
+      "weather": "Sunny.",
       "tempLabel": "High",
       "temp": "In the lower 80s.",
-      "winds": "Northwest winds around 5 mph, becoming",
-      "sunrise": "6:33 AM",
+      "winds": "Southwest winds around 5 mph, becoming south in the afternoon.",
+      "sunrise": "6:34 AM",
       "sunset": "5:40 PM"
      }
     ],
@@ -80,16 +89,6 @@
       "events": [
        {
         "type": "Low",
-        "ft": -0.5,
-        "t": "2026-11-23T19:50:00-10:00"
-       },
-       {
-        "type": "High",
-        "ft": 3.2,
-        "t": "2026-11-24T03:08:00-10:00"
-       },
-       {
-        "type": "Low",
         "ft": 0.7,
         "t": "2026-11-24T09:45:00-10:00"
        },
@@ -97,6 +96,26 @@
         "type": "High",
         "ft": 1.5,
         "t": "2026-11-24T14:18:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": -0.6,
+        "t": "2026-11-24T20:30:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 3.2,
+        "t": "2026-11-25T03:54:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.7,
+        "t": "2026-11-25T10:42:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.4,
+        "t": "2026-11-25T15:01:00-10:00"
        }
       ]
      }
@@ -107,14 +126,14 @@
     "name": "Big Island Leeward",
     "periods": [
      {
-      "label": "Tonight",
+      "label": "Today",
       "cols": [
-       "PM",
-       "AM"
+       "AM",
+       "PM"
       ]
      },
      {
-      "label": "Tuesday",
+      "label": "Wednesday",
       "cols": [
        "AM",
        "PM"
@@ -125,10 +144,10 @@
      {
       "facing": "West",
       "values": [
-       "1-3",
-       "1-3",
+       "2-4",
        "5-7",
-       "6-8"
+       "5-7",
+       "4-6"
       ]
      },
      {
@@ -143,21 +162,30 @@
     ],
     "days": [
      {
+      "label": "Rest Of Today",
+      "weather": "Mostly sunny. Isolated showers.",
+      "tempLabel": "High",
+      "temp": "In the lower 80s.",
+      "winds": "North winds around 5 mph.",
+      "sunrise": "6:37 AM",
+      "sunset": "5:44 PM"
+     },
+     {
       "label": "Tonight",
-      "weather": "Partly cloudy. Isolated showers.",
+      "weather": "Mostly clear. Isolated showers.",
       "tempLabel": "Low",
-      "temp": "In the upper 60s.",
-      "winds": "Northwest winds around 5 mph early, becoming light and variable, then becoming east around 5 mph after midnight.",
+      "temp": "In the mid 60s.",
+      "winds": "Northeast winds around 5 mph, becoming east after midnight.",
       "sunrise": null,
       "sunset": null
      },
      {
-      "label": "Tuesday",
-      "weather": "Mostly sunny. Isolated showers.",
+      "label": "Wednesday",
+      "weather": "Sunny.",
       "tempLabel": "High",
       "temp": "In the lower 80s.",
-      "winds": "Light and variable winds, becoming northwest around 5 mph in the afternoon.",
-      "sunrise": "6:37 AM",
+      "winds": "East winds around 5 mph, becoming west in the afternoon.",
+      "sunrise": "6:38 AM",
       "sunset": "5:44 PM"
      }
     ],
@@ -167,16 +195,6 @@
       "events": [
        {
         "type": "Low",
-        "ft": -0.3,
-        "t": "2026-11-23T20:27:00-10:00"
-       },
-       {
-        "type": "High",
-        "ft": 2.5,
-        "t": "2026-11-24T03:46:00-10:00"
-       },
-       {
-        "type": "Low",
         "ft": 0.5,
         "t": "2026-11-24T10:22:00-10:00"
        },
@@ -184,22 +202,32 @@
         "type": "High",
         "ft": 1.2,
         "t": "2026-11-24T14:56:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": -0.4,
+        "t": "2026-11-24T21:07:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 2.6,
+        "t": "2026-11-25T04:32:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.5,
+        "t": "2026-11-25T11:19:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 1.1,
+        "t": "2026-11-25T15:39:00-10:00"
        }
       ]
      },
      {
       "station": "Kawaihae",
       "events": [
-       {
-        "type": "Low",
-        "ft": -0.3,
-        "t": "2026-11-23T20:31:00-10:00"
-       },
-       {
-        "type": "High",
-        "ft": 2.8,
-        "t": "2026-11-24T03:54:00-10:00"
-       },
        {
         "type": "Low",
         "ft": 0.2,
@@ -209,6 +237,26 @@
         "type": "High",
         "ft": 0.9,
         "t": "2026-11-24T15:42:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": -0.3,
+        "t": "2026-11-24T21:11:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 2.9,
+        "t": "2026-11-25T04:38:00-10:00"
+       },
+       {
+        "type": "Low",
+        "ft": 0.1,
+        "t": "2026-11-25T11:57:00-10:00"
+       },
+       {
+        "type": "High",
+        "ft": 0.8,
+        "t": "2026-11-25T16:31:00-10:00"
        }
       ]
      }
@@ -218,7 +266,7 @@
  },
  "outlook": {
   "source": "Open-Meteo marine model, swell wave height",
-  "generated": "2026-11-24T12:57:32Z",
+  "generated": "2026-11-24T23:39:20Z",
   "shores": [
    {
     "key": "west",
@@ -444,7 +492,7 @@
  },
  "tides": {
   "source": "NOAA CO-OPS tide predictions, feet above MLLW",
-  "generated": "2026-11-24T12:57:32Z",
+  "generated": "2026-11-24T23:39:20Z",
   "stations": {
    "Kona": {
     "id": "1617846",
